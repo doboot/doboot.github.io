@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css">
+
+<link href="https://fonts.cat.net/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1.概述在创建REST API时，良好的文档能极大地提升对外交互的效率。同时，文档必须详细的记录API中的每个细节。这是一项繁琐的工作，好在已经有人提供了各类非常好的自动化工具，Swagger就是其中非常优秀的一款。 今天我们将看一下如何将Swagger 2集成到我们的 Spring REST 服务中在本文中，我们将使用Swagger 2规范的Springfox实现。 如果您不熟悉Swagger，">
+<meta name="keywords" content="Swagger2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Swagger2的集成">
+<meta property="og:url" content="http://doboot.github.io/2016/01/07/swagger2-de-ji-cheng/index.html">
+<meta property="og:site_name" content="Ivan&#39;s Blog">
+<meta property="og:description" content="1.概述在创建REST API时，良好的文档能极大地提升对外交互的效率。同时，文档必须详细的记录API中的每个细节。这是一项繁琐的工作，好在已经有人提供了各类非常好的自动化工具，Swagger就是其中非常优秀的一款。 今天我们将看一下如何将Swagger 2集成到我们的 Spring REST 服务中在本文中，我们将使用Swagger 2规范的Springfox实现。 如果您不熟悉Swagger，">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://doboot.github.io/images/pasted-102.png">
+<meta property="og:image" content="http://doboot.github.io/images/pasted-103.png">
+<meta property="og:image" content="http://doboot.github.io/images/pasted-104.png">
+<meta property="og:image" content="http://doboot.github.io/images/pasted-105.png">
+<meta property="og:image" content="http://doboot.github.io/images/pasted-106.png">
+<meta property="og:updated_time" content="2020-11-14T06:10:20.944Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Swagger2的集成">
+<meta name="twitter:description" content="1.概述在创建REST API时，良好的文档能极大地提升对外交互的效率。同时，文档必须详细的记录API中的每个细节。这是一项繁琐的工作，好在已经有人提供了各类非常好的自动化工具，Swagger就是其中非常优秀的一款。 今天我们将看一下如何将Swagger 2集成到我们的 Spring REST 服务中在本文中，我们将使用Swagger 2规范的Springfox实现。 如果您不熟悉Swagger，">
+<meta name="twitter:image" content="http://doboot.github.io/images/pasted-102.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Ivan's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://doboot.github.io/2016/01/07/swagger2-de-ji-cheng/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Swagger2的集成 | Ivan's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ivan's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">虽日暮途远，仍梦想诗和远方</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://doboot.github.io/2016/01/07/swagger2-de-ji-cheng/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ivan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/348097?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ivan's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Swagger2的集成
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2016-01-07 19:44:00" itemprop="dateCreated datePublished" datetime="2016-01-07T19:44:00+08:00">2016-01-07</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-14 14:10:20" itemprop="dateModified" datetime="2020-11-14T14:10:20+08:00">2020-11-14</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2016/01/07/swagger2-de-ji-cheng/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2016/01/07/swagger2-de-ji-cheng/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">7.5k</span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1.概述"></a><strong>1.概述</strong></h2><p>在创建REST API时，良好的文档能极大地提升对外交互的效率。同时，文档必须详细的记录API中的每个细节。这是一项繁琐的工作，好在已经有人提供了各类非常好的自动化工具，Swagger就是其中非常优秀的一款。</p>
+<p>今天我们将看一下如何将<strong>Swagger 2集成到我们的 Spring REST 服务中</strong>在本文中，我们将使用Swagger 2规范的<strong>Springfox</strong>实现。</p>
+<p>如果您不熟悉Swagger，在继续阅读本文之前，您可以到<a href="http://swagger.io/" target="_blank" rel="noopener">Swagger官方站点</a>了解一下（或者Google一些相关的简介，<strong>不</strong>推荐百度，你懂的）。</p>
+<a id="more"></a>
+<h2 id="2-添加Maven依赖项"><a href="#2-添加Maven依赖项" class="headerlink" title="2. 添加Maven依赖项"></a>2. 添加Maven依赖项</h2><p>如上所述，我们将使用Swagger规范的Springfox实现。最新版本可<a href="https://search.maven.org/classic/#search%7Cga%7C1%7C%22Springfox%20Swagger2%22" target="_blank" rel="noopener">在Maven Central</a>上找到  。</p>
+<p>要将它添加到我们的Maven项目中，我们需要<em>pom.xml</em>文件中的依赖项。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.springfox<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>springfox-swagger2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.9.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="3-将Swagger-2集成到项目中"><a href="#3-将Swagger-2集成到项目中" class="headerlink" title="3. 将Swagger 2集成到项目中"></a>3. 将Swagger 2集成到项目中</h2><h3 id="3-1-Java配置"><a href="#3-1-Java配置" class="headerlink" title="3.1 Java配置"></a>3.1 Java配置</h3><p>Swagger的配置主要围绕<strong><em>Docket</em></strong> 来创建，代码如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Configuration</span><br><span class="line"><span class="meta">@EnableSwagger</span>2</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SwaggerConfig</span> </span>&#123;                                    </span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Docket <span class="title">api</span><span class="params">()</span> </span>&#123; </span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Docket(DocumentationType.SWAGGER_2)  </span><br><span class="line">          .select()                                  </span><br><span class="line">          .apis(RequestHandlerSelectors.any())              </span><br><span class="line">          .paths(PathSelectors.any())                          </span><br><span class="line">          .build();                                           </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>通过@ EnableSwagger2注解启用Swagger 2 </strong></p>
+<p>定义<em>Docket</em> bean 之后，其<em>select()</em>方法返回<em>ApiSelectorBuilder的</em>一个实例，它提供了一种控制Swagger公开的端点的方法。</p>
+<p>可以在<em>RequestHandlerSelectors</em>和<em>PathSelectors</em>的帮助下配置选择<em>RequestHandler</em>的断言，示例中的<em>any()法</em>将通过Swagger提供整个API的文档。</p>
+<p><strong>这种配置足以将Swagger 2集成到现有的Spring Boot项目中</strong>，对于其他Spring项目，需要进行一些额外的调整。</p>
+<h3 id="3-2-非Spring-Boot环境下的配置"><a href="#3-2-非Spring-Boot环境下的配置" class="headerlink" title="3.2 非Spring Boot环境下的配置"></a>3.2 非Spring Boot环境下的配置</h3><p>如果你的项目中没有使用Spring Boot，Swagger UI添加了一组资源，您必须将这些资源配置为扩展<em>WebMvcConfigurerAdapter</em>的类的一部分，并使用<em>@EnableWebMvc</em>进行注解。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addResourceHandlers</span><span class="params">(ResourceHandlerRegistry registry)</span> </span>&#123;</span><br><span class="line">    registry.addResourceHandler(<span class="string">"swagger-ui.html"</span>)</span><br><span class="line">      .addResourceLocations(<span class="string">"classpath:/META-INF/resources/"</span>);</span><br><span class="line"> </span><br><span class="line">    registry.addResourceHandler(<span class="string">"/webjars/**"</span>)</span><br><span class="line">      .addResourceLocations(<span class="string">"classpath:/META-INF/resources/webjars/"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-3-验证"><a href="#3-3-验证" class="headerlink" title="3.3 验证"></a>3.3 验证</h3><p>要验证Springfox是否正常工作，您可以在浏览器中访问以下URL：</p>
+<p><em>HTTP://本地主机:8080/demo/API/V1/API-文档</em></p>
+<p>结果是具有大量键值对的JSON响应，当然，对于人来说，可读性还是太差，为此 Swagger 为此提供了<strong>Swagger UI</strong>。</p>
+<h2 id="4-Swagger-UI"><a href="#4-Swagger-UI" class="headerlink" title="4. Swagger UI"></a>4. Swagger UI</h2><p>Swagger UI是一个内置的解决方案，使用户与Swagger生成的API文档的交互更加容易。</p>
+<h3 id="4-1-启用Springfox的Swagger-UI"><a href="#4-1-启用Springfox的Swagger-UI" class="headerlink" title="4.1 启用Springfox的Swagger UI"></a>4.1 启用Springfox的Swagger UI</h3><p>要使用Swagger UI，需要一个额外的Maven依赖项：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.springfox<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>springfox-swagger-ui<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.9.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>现在，您可以通过访问<em><a href="http://localhost:8080/your-app-root/swagger-ui.html" target="_blank" rel="noopener">http://localhost:8080/your-app-root/swagger-ui.html</a></em> 在浏览器中对其进行测试。</p>
+<p>结果应如下所示：</p>
+<p><img src="/images/pasted-102.png" alt="upload successful"></p>
+<h3 id="4-2-浏览-Swagger-文档"><a href="#4-2-浏览-Swagger-文档" class="headerlink" title="4.2 浏览 Swagger 文档"></a>4.2 浏览 Swagger 文档</h3><p>在Swagger中返回的是应用程序中定义<strong>的所有控制器的列表</strong>。单击其中任何一个将列出有效的HTTP方法（<em>DELETE</em>，<em>GET</em>，<em>HEAD</em>，<em>OPTIONS</em>，<em>PATCH</em>，<em>POST</em>，<em>PUT</em>）。</p>
+<p>扩展每个方法可提供其他有用的数据，例如响应状态，内容类型和参数列表。也可以使用U提供的 <em>try</em> 功能去测试每种方法。</p>
+<p>同时Swagger能与您的应用代码实时同步，动态地去获取你所有的 Controller 接口，比如我们添加一个新的 Controller ：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomController</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@RequestMapping</span>(value = <span class="string">"/custom"</span>, method = RequestMethod.POST)</span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">custom</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"custom"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>现在，如果刷新Swagger文档，您将在控制器列表中看到<strong>CustomController</strong>。同时根据 <em>@RequestMapping(value = “/custom”, method = RequestMethod.POST)</em> 定义，Swagger的响应中只显示了一种方法（<em>POST</em>）。</p>
+<h2 id="5-高级配置"><a href="#5-高级配置" class="headerlink" title="5. 高级配置"></a>5. 高级配置</h2><p>可以配置应用程序的<em>Docket</em> bean，以便更好地控制API文档生成过程。</p>
+<h3 id="5-1-过滤Swagger响应的API"><a href="#5-1-过滤Swagger响应的API" class="headerlink" title="5.1 过滤Swagger响应的API"></a>5.1 过滤Swagger响应的API</h3><p>有时候你并不希望公开整个API的文档，那么您可以通过将参数传递给<em>Docket</em>类的<strong><em>apis()</em></strong>和<strong><em>paths()</em></strong>方法来限制Swagger的响应输出。</p>
+<p>如上所示，<em>RequestHandlerSelectors</em>允许使用<em>any</em>或<em>none</em> 断言，但也可以用于根据基础包，类注解和方法注解过滤API。</p>
+<p><strong><em>PathSelectors</em></strong>使用断言提供额外的过滤，这些断言扫描应用程序的请求路径。您可以使用 <em>any()</em>， <em>none()</em>，<em>regex()</em>或 <em>ant()</em>。</p>
+<p>在下面的示例中，我们将使用<em>ant()</em>断言指示Swagger仅包含特定包中的控制器和特定路径。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Docket <span class="title">api</span><span class="params">()</span> </span>&#123;                </span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Docket(DocumentationType.SWAGGER_2)          </span><br><span class="line">      .select()                                       </span><br><span class="line">      .apis(RequestHandlerSelectors.basePackage(<span class="string">"com.doleje.web.controller"</span>))</span><br><span class="line">      .paths(PathSelectors.ant(<span class="string">"/foos/*"</span>))                     </span><br><span class="line">      .build();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="5-2-自定义信息"><a href="#5-2-自定义信息" class="headerlink" title="5.2 自定义信息"></a>5.2 自定义信息</h3><p>Swagger还在其响应中提供了一些默认值，您可以自定义它们，例如“Api文档”，“由联系人电子邮件创建”，“Apache 2.0”，要更改这些值，可以使用<strong>apiInfo（ApiInfo apiInfo）</strong>方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Docket <span class="title">api</span><span class="params">()</span> </span>&#123;                </span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Docket(DocumentationType.SWAGGER_2)          </span><br><span class="line">      .select()</span><br><span class="line">      .apis(RequestHandlerSelectors.basePackage(<span class="string">"com.example.controller"</span>))</span><br><span class="line">      .paths(PathSelectors.ant(<span class="string">"/foos/*"</span>))</span><br><span class="line">      .build()</span><br><span class="line">      .apiInfo(apiInfo());</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">private</span> ApiInfo <span class="title">apiInfo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> ApiInfo(</span><br><span class="line">      <span class="string">"My REST API"</span>, </span><br><span class="line">      <span class="string">"Some custom description of API."</span>, </span><br><span class="line">      <span class="string">"API TOS"</span>, </span><br><span class="line">      <span class="string">"Terms of service"</span>, </span><br><span class="line">      <span class="keyword">new</span> Contact(<span class="string">"John Doe"</span>, <span class="string">"www.example.com"</span>, <span class="string">"myeaddress@company.com"</span>), </span><br><span class="line">      <span class="string">"License of API"</span>, <span class="string">"API license URL"</span>, Collections.emptyList());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="5-3-自定义方法响应消息"><a href="#5-3-自定义方法响应消息" class="headerlink" title="5.3 自定义方法响应消息"></a>5.3 自定义方法响应消息</h3><p>Swagger允许通过<em>Docket</em>的<strong>globalResponseMessage()</strong>方法<strong>全局覆盖HTTP方法的响应消息</strong>，要启用这个功能必须指示Swagger不要使用默认响应消息。</p>
+<p>假设您希望覆盖所有<em>GET</em>方法的<strong>500</strong>和<strong>403</strong>响应消息。为此，必须将一些代码添加到<em>Docket</em>的初始化块中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.useDefaultResponseMessages(<span class="keyword">false</span>)                                   </span><br><span class="line">.globalResponseMessage(RequestMethod.GET,                     </span><br><span class="line">  newArrayList(<span class="keyword">new</span> ResponseMessageBuilder()   </span><br><span class="line">    .code(<span class="number">500</span>)</span><br><span class="line">    .message(<span class="string">"500 message"</span>)</span><br><span class="line">    .responseModel(<span class="keyword">new</span> ModelRef(<span class="string">"Error"</span>))</span><br><span class="line">    .build(),</span><br><span class="line">    <span class="keyword">new</span> ResponseMessageBuilder() </span><br><span class="line">      .code(<span class="number">403</span>)</span><br><span class="line">      .message(<span class="string">"Forbidden!"</span>)</span><br><span class="line">      .build()));</span><br></pre></td></tr></table></figure>
+<p><img src="/images/pasted-103.png" alt="upload successful"></p>
+<h2 id="6-使用OAuth保护的API-Swagger-UI"><a href="#6-使用OAuth保护的API-Swagger-UI" class="headerlink" title="6. 使用OAuth保护的API Swagger UI"></a>6. 使用OAuth保护的API Swagger UI</h2><p>Swagger UI提供了许多非常有用的功能。但是，如果我们的API受到保护且无法访问，我们就无法真正使用其中的大多数。实际上 Swagger 支持采用OAuth 来保护和授权我们API的安全。</p>
+<p>我们将使用<em>SecurityScheme</em>和<em>SecurityContext</em>支持配置Swagger来访问我们的安全API ：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Docket <span class="title">api</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Docket(DocumentationType.SWAGGER_2).select()</span><br><span class="line">        .apis(RequestHandlerSelectors.any())</span><br><span class="line">        .paths(PathSelectors.any())</span><br><span class="line">        .build()</span><br><span class="line">        .securitySchemes(Arrays.asList(securityScheme()))</span><br><span class="line">        .securityContexts(Arrays.asList(securityContext()));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="6-1-ecurity-Configuration"><a href="#6-1-ecurity-Configuration" class="headerlink" title="6.1 ecurity Configuration"></a>6.1 ecurity Configuration</h3><p>我们将在Swagger配置中定义一个<em>SecurityConfiguration</em> bean 并设置一些默认值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> SecurityConfiguration <span class="title">security</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> SecurityConfigurationBuilder.builder()</span><br><span class="line">        .clientId(CLIENT_ID)</span><br><span class="line">        .clientSecret(CLIENT_SECRET)</span><br><span class="line">        .scopeSeparator(<span class="string">" "</span>)</span><br><span class="line">        .useBasicAuthenticationWithAccessCodeGrant(<span class="keyword">true</span>)</span><br><span class="line">        .build();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="6-2-SecurityScheme"><a href="#6-2-SecurityScheme" class="headerlink" title="6.2 SecurityScheme"></a>6.2 SecurityScheme</h3><p>接下来，定义<em>SecurityScheme</em>，这用于描述我们的API如何受到保护（比如基本身份验证，OAuth2或等 ）。代码如下所示（这里要用到 OAuth 的相关技术，大家可以参考我其它的关于 SpringSecurity OAuth 的博客）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> SecurityScheme <span class="title">securityScheme</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    GrantType grantType = <span class="keyword">new</span> AuthorizationCodeGrantBuilder()</span><br><span class="line">        .tokenEndpoint(<span class="keyword">new</span> TokenEndpoint(AUTH_SERVER + <span class="string">"/token"</span>, <span class="string">"oauthtoken"</span>))</span><br><span class="line">        .tokenRequestEndpoint(</span><br><span class="line">          <span class="keyword">new</span> TokenRequestEndpoint(AUTH_SERVER + <span class="string">"/authorize"</span>, CLIENT_ID, CLIENT_ID))</span><br><span class="line">        .build();</span><br><span class="line"> </span><br><span class="line">    SecurityScheme oauth = <span class="keyword">new</span> OAuthBuilder().name(<span class="string">"spring_oauth"</span>)</span><br><span class="line">        .grantTypes(Arrays.asList(grantType))</span><br><span class="line">        .scopes(Arrays.asList(scopes()))</span><br><span class="line">        .build();</span><br><span class="line">    <span class="keyword">return</span> oauth;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>请注意，我们使用了授权代码授权类型 - 我们需要为其提供令牌端点和OAuth2授权服务器的授权URL。以下是我们需要定义的范围：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> AuthorizationScope[] scopes() &#123;</span><br><span class="line">    AuthorizationScope[] scopes = &#123; </span><br><span class="line">      <span class="keyword">new</span> AuthorizationScope(<span class="string">"read"</span>, <span class="string">"for read operations"</span>), </span><br><span class="line">      <span class="keyword">new</span> AuthorizationScope(<span class="string">"write"</span>, <span class="string">"for write operations"</span>), </span><br><span class="line">      <span class="keyword">new</span> AuthorizationScope(<span class="string">"foo"</span>, <span class="string">"Access foo API"</span>) &#125;;</span><br><span class="line">    <span class="keyword">return</span> scopes;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这些与<em>/ foos</em> API 在我们的应用程序中实际定义的范围保持一致。</p>
+<h3 id="6-3-Security-Context"><a href="#6-3-Security-Context" class="headerlink" title="6.3 Security Context"></a>6.3 Security Context</h3><p>最后，我们需要为示例API定义安全上下文：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> SecurityContext <span class="title">securityContext</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> SecurityContext.builder()</span><br><span class="line">      .securityReferences(</span><br><span class="line">        Arrays.asList(<span class="keyword">new</span> SecurityReference(<span class="string">"spring_oauth"</span>, scopes())))</span><br><span class="line">      .forPaths(PathSelectors.regex(<span class="string">"/foos.*"</span>))</span><br><span class="line">      .build();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>请注意我们在这里使用的名称 - <em>spring_oauth</em> - 与<em>SecurityScheme中</em>我们之前使用的名称保持一致。</p>
+<h3 id="6-4-测试"><a href="#6-4-测试" class="headerlink" title="6.4 测试"></a>6.4 测试</h3><p>好了，现在我们已经准备好了所有内容，让我们看看我们的Swagger UI并尝试访问Foo API：</p>
+<p>我们可以在本地访问Swagger UI：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:8082/spring-security-oauth-resource/swagger-ui.html</span><br></pre></td></tr></table></figure>
+<p>我们可以看到由于我们的安全配置，现在存在一个新的“Authorize”按钮：</p>
+<p><img src="/images/pasted-104.png" alt="upload successful"></p>
+<p>当我们点击“Authorize”按钮时，我们可以看到以下弹出窗口 - 授权我们的Swagger UI访问安全API：</p>
+<p><img src="/images/pasted-105.png" alt="upload successful"></p>
+<p>注意：</p>
+<ul>
+<li>我们已经可以看到CLIENT_ID和CLIENT_SECRET - 因为我们之前已经预先配置了它们（但我们仍然可以更改它们）</li>
+<li>我们现在可以选择我们需要的范围</li>
+</ul>
+<p>如下图所示受保护的API标记：</p>
+<p><img src="/images/pasted-106.png" alt="upload successful"></p>
+<p>现在，最后，我们可以点击我们的API！</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-wepay.jpg" alt="Ivan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-alipay.jpg" alt="Ivan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Swagger2/" rel="tag"># Swagger2</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/07/uri-url-urn/" rel="next" title="你知道URL、URI和URN三者之间的区别吗？">
+                <i class="fa fa-chevron-left"></i> 你知道URL、URI和URN三者之间的区别吗？
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/11/spring-zhu-ru-zhi-resource-autowired-yi-ji-inject-de-qu-bie/" rel="prev" title="Spring注入之@Resource、@Autowired以及@Inject的区别">
+                Spring注入之@Resource、@Autowired以及@Inject的区别 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/348097?s=460&v=4" alt="Ivan">
+            
+              <p class="site-author-name" itemprop="name">Ivan</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">104</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">99</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/huangfengjing" title="GitHub &rarr; https://github.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:huangfengjing@gmail.com" title="E-Mail &rarr; mailto:huangfengjing@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/huangfengjing" title="Weibo &rarr; https://weibo.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://plus.google.com/huangfengjing" title="Google &rarr; https://plus.google.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/huangfengjing" title="Twitter &rarr; https://twitter.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.facebook.com/huangfengjing" title="FB Page &rarr; https://www.facebook.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-facebook"></i>FB Page</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-概述"><span class="nav-text">1.概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-添加Maven依赖项"><span class="nav-text">2. 添加Maven依赖项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-将Swagger-2集成到项目中"><span class="nav-text">3. 将Swagger 2集成到项目中</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Java配置"><span class="nav-text">3.1 Java配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-非Spring-Boot环境下的配置"><span class="nav-text">3.2 非Spring Boot环境下的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-验证"><span class="nav-text">3.3 验证</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Swagger-UI"><span class="nav-text">4. Swagger UI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-启用Springfox的Swagger-UI"><span class="nav-text">4.1 启用Springfox的Swagger UI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-浏览-Swagger-文档"><span class="nav-text">4.2 浏览 Swagger 文档</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-高级配置"><span class="nav-text">5. 高级配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-过滤Swagger响应的API"><span class="nav-text">5.1 过滤Swagger响应的API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-自定义信息"><span class="nav-text">5.2 自定义信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-自定义方法响应消息"><span class="nav-text">5.3 自定义方法响应消息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-使用OAuth保护的API-Swagger-UI"><span class="nav-text">6. 使用OAuth保护的API Swagger UI</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-ecurity-Configuration"><span class="nav-text">6.1 ecurity Configuration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-SecurityScheme"><span class="nav-text">6.2 SecurityScheme</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-Security-Context"><span class="nav-text">6.3 Security Context</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-4-测试"><span class="nav-text">6.4 测试</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ivan</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'sPghJWhcIktqFoKTHCULrW4R-gzGzoHsz',
+    appKey: 'BlHUFUqfO9HAKGSBaWWNuTUi',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

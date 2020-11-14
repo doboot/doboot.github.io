@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css">
+
+<link href="https://fonts.cat.net/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="下面我们看看Spring JDBC相关的实现，在Spring中，JdbcTemplate是经常被使用的类来帮助用户程序操作数据库，在JdbcTemplate为用户程序提供了许多便利的数据库操作方法，比如查询，更新等，而且在Spring中，有许多类似 JdbcTemplate的模板,比如HibernateTemplate等等。">
+<meta name="keywords" content="Spring,源码解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring源码解读——JDBC">
+<meta property="og:url" content="http://doboot.github.io/2012/03/07/spring-yuan-ma-jie-du-jdbc/index.html">
+<meta property="og:site_name" content="Ivan&#39;s Blog">
+<meta property="og:description" content="下面我们看看Spring JDBC相关的实现，在Spring中，JdbcTemplate是经常被使用的类来帮助用户程序操作数据库，在JdbcTemplate为用户程序提供了许多便利的数据库操作方法，比如查询，更新等，而且在Spring中，有许多类似 JdbcTemplate的模板,比如HibernateTemplate等等。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-14T06:10:20.942Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spring源码解读——JDBC">
+<meta name="twitter:description" content="下面我们看看Spring JDBC相关的实现，在Spring中，JdbcTemplate是经常被使用的类来帮助用户程序操作数据库，在JdbcTemplate为用户程序提供了许多便利的数据库操作方法，比如查询，更新等，而且在Spring中，有许多类似 JdbcTemplate的模板,比如HibernateTemplate等等。">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Ivan's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://doboot.github.io/2012/03/07/spring-yuan-ma-jie-du-jdbc/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Spring源码解读——JDBC | Ivan's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ivan's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">虽日暮途远，仍梦想诗和远方</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://doboot.github.io/2012/03/07/spring-yuan-ma-jie-du-jdbc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ivan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/348097?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ivan's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Spring源码解读——JDBC
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2012-03-07 22:18:00" itemprop="dateCreated datePublished" datetime="2012-03-07T22:18:00+08:00">2012-03-07</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-14 14:10:20" itemprop="dateModified" datetime="2020-11-14T14:10:20+08:00">2020-11-14</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/源码解读/" itemprop="url" rel="index"><span itemprop="name">源码解读</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2012/03/07/spring-yuan-ma-jie-du-jdbc/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2012/03/07/spring-yuan-ma-jie-du-jdbc/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">9.7k</span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>下面我们看看Spring JDBC相关的实现，在Spring中，JdbcTemplate是经常被使用的类来帮助用户程序操作数据库，在JdbcTemplate为用户程序提供了许多便利的数据库操作方法，比如查询，更新等，而且在Spring中，有许多类似 JdbcTemplate的模板,比如HibernateTemplate等等。<br><a id="more"></a></p>
+<p>看来这是Rod.Johnson的惯用手法，一般而言这种Template中都是通过回调函数CallBack类的使用来完成功能的，客户需要在回调接口中实现自己需要的定制行为，比如使用客户想要用的SQL语句等。不过往往Spring通过这种回调函数的实现已经为我们提供了许多现成的方法供客户使用。一般来说回调函数的用法采用匿名类的方式来实现，比如：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">JdbcTemplate = <span class="keyword">new</span> JdbcTemplate(datasource);  </span><br><span class="line">jdbcTemplate.execute(<span class="keyword">new</span> CallBack()&#123;  </span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="title">CallbackInterfacedoInAction</span><span class="params">()</span></span>&#123;  </span><br><span class="line">               ......  </span><br><span class="line">               <span class="comment">//用户定义的代码或者说Spring替我们实现的代码  </span></span><br><span class="line">            &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在模板中嵌入的是需要客户化的代码，由Spring来作或者需要客户程序亲自动手完成。下面让我们具体看看在JdbcTemplate中的代码是怎样完成使命的，我们举JdbcTemplate.execute()为例，这个方法是在JdbcTemplate中被其他方法调用的基本方法之一，客户程序往往用这个方法来执行基本的SQL语句：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">execute</span><span class="params">(ConnectionCallback action)</span> <span class="keyword">throws</span> DataAccessException </span>&#123;  </span><br><span class="line">    <span class="comment">//这里得到数据库联接  </span></span><br><span class="line">    Connection con = DataSourceUtils.getConnection(getDataSource());  </span><br><span class="line">    <span class="keyword">try</span> &#123;  </span><br><span class="line">        Connection conToUse = con;  </span><br><span class="line">        <span class="comment">//有些特殊的数据库，需要我们使用特别的方法取得datasource  </span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.nativeJdbcExtractor != <span class="keyword">null</span>) &#123;  </span><br><span class="line">            <span class="comment">// Extract native JDBC Connection, castable to OracleConnection or the like.  </span></span><br><span class="line">            conToUse = <span class="keyword">this</span>.nativeJdbcExtractor.getNativeConnection(con);  </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;  </span><br><span class="line">            <span class="comment">// Create close-suppressing Connection proxy, also preparing returned Statements.  </span></span><br><span class="line">            conToUse = createConnectionProxy(con);  </span><br><span class="line">        &#125;</span><br><span class="line">    <span class="comment">//这里调用的是传递进来的匿名类的方法，也就是用户程序需要实现CallBack接口的地方。  </span></span><br><span class="line">        <span class="keyword">return</span> action.doInConnection(conToUse);  </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (SQLException ex) &#123;  </span><br><span class="line">        <span class="comment">//如果捕捉到数据库异常，把数据库联接释放，同时抛出一个经过Spring转换过的Spring数据库异常，  </span></span><br><span class="line">        <span class="comment">//我们知道，Spring做了一个有意义的工作是把这些数据库异常统一到自己的异常体系里了。  </span></span><br><span class="line">        DataSourceUtils.releaseConnection(con, getDataSource());  </span><br><span class="line">        con = <span class="keyword">null</span>;  </span><br><span class="line">        <span class="keyword">throw</span> getExceptionTranslator().translate(<span class="string">"ConnectionCallback"</span>, getSql(action), ex);  </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">finally</span> &#123;  </span><br><span class="line">        <span class="comment">//最后不管怎样都会把数据库连接释放  </span></span><br><span class="line">        DataSourceUtils.releaseConnection(con, getDataSource());  </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>对于JdbcTemplate中给出的其他方法，比如query,update,execute等的实现，我们看看query()：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">query</span><span class="params">(PreparedStatementCreator psc, <span class="keyword">final</span> PreparedStatementSetter pss, <span class="keyword">final</span> ResultSetExtractor rse)</span>  </span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> DataAccessException </span>&#123;  </span><br><span class="line">    ..........  </span><br><span class="line">    <span class="comment">//这里调用了我们上面看到的execute()基本方法,然而这里的回调实现是Spring为我们完成的查询过程  </span></span><br><span class="line">    <span class="keyword">return</span> execute(psc, <span class="keyword">new</span> PreparedStatementCallback() &#123;  </span><br><span class="line">        <span class="function"><span class="keyword">public</span> Object <span class="title">doInPreparedStatement</span><span class="params">(PreparedStatement ps)</span> <span class="keyword">throws</span> SQLException </span>&#123;  </span><br><span class="line">            <span class="comment">//准备查询结果集  </span></span><br><span class="line">            ResultSet rs = <span class="keyword">null</span>;  </span><br><span class="line">            <span class="keyword">try</span> &#123;  </span><br><span class="line">            <span class="comment">//这里配置SQL参数  </span></span><br><span class="line">                <span class="keyword">if</span> (pss != <span class="keyword">null</span>) &#123;  </span><br><span class="line">                    pss.setValues(ps);  </span><br><span class="line">                &#125;</span><br><span class="line">          <span class="comment">//这里执行的SQL查询  </span></span><br><span class="line">                rs = ps.executeQuery();  </span><br><span class="line">                ResultSet rsToUse = rs;  </span><br><span class="line">                <span class="keyword">if</span> (nativeJdbcExtractor != <span class="keyword">null</span>) &#123;  </span><br><span class="line">                    rsToUse = nativeJdbcExtractor.getNativeResultSet(rs);  </span><br><span class="line">                &#125;</span><br><span class="line">         <span class="comment">//返回需要的记录集合  </span></span><br><span class="line">                <span class="keyword">return</span> rse.extractData(rsToUse);  </span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">finally</span> &#123;  </span><br><span class="line">        <span class="comment">//最后关闭查询的纪录集，对数据库连接的释放在execute()中释放，就像我们在上面分析的看到那样。  </span></span><br><span class="line">                JdbcUtils.closeResultSet(rs);  </span><br><span class="line">                <span class="keyword">if</span> (pss <span class="keyword">instanceof</span> ParameterDisposer) &#123;  </span><br><span class="line">                    ((ParameterDisposer) pss).cleanupParameters();  </span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>辅助类DataSourceUtils来用来对数据库连接进行管理的主要工具，比如打开和关闭数据库连接等基本操作：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Connection <span class="title">doGetConnection</span><span class="params">(DataSource dataSource)</span> <span class="keyword">throws</span> SQLException </span>&#123;  </span><br><span class="line">   <span class="comment">//把对数据库连接放到事务管理里面进行管理  </span></span><br><span class="line">    ConnectionHolder conHolder = (ConnectionHolder) TransactionSynchronizationManager.getResource(dataSource);  </span><br><span class="line">    <span class="keyword">if</span> (conHolder != <span class="keyword">null</span> &amp;&amp; (conHolder.hasConnection() || conHolder.isSynchronizedWithTransaction())) &#123;  </span><br><span class="line">        conHolder.requested();  </span><br><span class="line">        <span class="keyword">if</span> (!conHolder.hasConnection()) &#123;  </span><br><span class="line">            logger.debug(<span class="string">"Fetching resumed JDBC Connection from DataSource"</span>);  </span><br><span class="line">            conHolder.setConnection(dataSource.getConnection());  </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> conHolder.getConnection();  </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 这里得到需要的数据库连接，在配置文件中定义好的。  </span></span><br><span class="line">    logger.debug(<span class="string">"Fetching JDBC Connection from DataSource"</span>);  </span><br><span class="line">    Connection con = dataSource.getConnection();  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">if</span> (TransactionSynchronizationManager.isSynchronizationActive()) &#123;  </span><br><span class="line">        logger.debug(<span class="string">"Registering transaction synchronization for JDBC Connection"</span>);  </span><br><span class="line">        <span class="comment">// Use same Connection for further JDBC actions within the transaction.  </span></span><br><span class="line">        <span class="comment">// Thread-bound object will get removed by synchronization at transaction completion.  </span></span><br><span class="line">        ConnectionHolder holderToUse = conHolder;  </span><br><span class="line">        <span class="keyword">if</span> (holderToUse == <span class="keyword">null</span>) &#123;  </span><br><span class="line">            holderToUse = <span class="keyword">new</span> ConnectionHolder(con);  </span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;  </span><br><span class="line">            holderToUse.setConnection(con);  </span><br><span class="line">        &#125;</span><br><span class="line">        holderToUse.requested();  </span><br><span class="line">        TransactionSynchronizationManager.registerSynchronization(  </span><br><span class="line">                <span class="keyword">new</span> ConnectionSynchronization(holderToUse, dataSource));  </span><br><span class="line">        holderToUse.setSynchronizedWithTransaction(<span class="keyword">true</span>);  </span><br><span class="line">        <span class="keyword">if</span> (holderToUse != conHolder) &#123;  </span><br><span class="line">            TransactionSynchronizationManager.bindResource(dataSource, holderToUse);  </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    <span class="keyword">return</span> con;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>那我们实际的DataSource对象是怎样得到的？很清楚我们需要在上下文中进行配置：它作为JdbcTemplate父类JdbcAccessor的属性存在：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">JdbcAccessor</span> <span class="keyword">implements</span> <span class="title">InitializingBean</span> </span>&#123;  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">/** 这里是我们依赖注入数据库数据源的地方。 */</span>  </span><br><span class="line">    <span class="keyword">private</span> DataSource dataSource;  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">/** Helper to translate SQL exceptions to DataAccessExceptions */</span>  </span><br><span class="line">    <span class="keyword">private</span> SQLExceptionTranslator exceptionTranslator;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> lazyInit = <span class="keyword">true</span>;  </span><br><span class="line">  </span><br><span class="line">    ........  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>而对于DataSource的缓冲池实现，我们通过定义Apache Jakarta Commons DBCP或者C3P0提供的DataSource来完成，然后只要在上下文中配置好就可以使用了。从上面我们看到JdbcTemplate提供了许多简单查询和更新功能，但是如果需要更高层次的抽象，以及更面向对象的方法来访问数据库。Spring为我们提供了org.springframework.jdbc.object包，这里面包含了SqlQuery,SqlMappingQuery, SqlUpdate和StoredProcedure等类，这些类都是Spring JDBC应用程序可以使用的主要类，但我们要注意使用这些类的时候，用户需要为他们配置好一个JdbcTemplate作为其基本的操作的实现。<br>比如说我们使用MappingSqlQuery来将表数据直接映射到一个对象集合 - 具体可以参考书中的例子<br>1.我们需要建立DataSource和sql语句并建立持有这些对象的MappingSqlQuery对象<br>2.然后我们需要定义传递的SqlParameter,具体的实现我们在MappingSqlQuery的父类RdbmsOperation中可以找到：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">declareParameter</span><span class="params">(SqlParameter param)</span> <span class="keyword">throws</span> InvalidDataAccessApiUsageException </span>&#123;  </span><br><span class="line">   <span class="comment">//如果声明已经被编译过，则该声明无效  </span></span><br><span class="line">   <span class="keyword">if</span> (isCompiled()) &#123;  </span><br><span class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> InvalidDataAccessApiUsageException(<span class="string">"Cannot add parameters once query is compiled"</span>);  </span><br><span class="line">   &#125;</span><br><span class="line">   <span class="comment">//这里对参数值进行声明定义  </span></span><br><span class="line">   <span class="keyword">this</span>.declaredParameters.add(param);</span><br></pre></td></tr></table></figure></p>
+<p>而这个declareParameters维护的是一个列表：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** List of SqlParameter objects */</span>  </span><br><span class="line"><span class="keyword">private</span> List declaredParameters = <span class="keyword">new</span> LinkedList();</span><br></pre></td></tr></table></figure></p>
+<p>这个列表在以后compile的过程中会被使用。<br>3.然后用户程序需要实现MappingSqlQuery的mapRow接口，将具体的ResultSet数据生成我们需要的对象，这是我们迭代使用的方法。1，2，3步实际上为我们定义好了一个迭代的基本单元作为操作模板。<br>4.在应用程序，我们直接调用execute()方法得到我们需要的对象列表，列表中的每一个对象的数据来自于执行SQL语句得到记录集的每一条记录，事实上执行的execute在父类SqlQuery中起作用：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> List <span class="title">executeByNamedParam</span><span class="params">(Map paramMap, Map context)</span> <span class="keyword">throws</span> DataAccessException </span>&#123;  </span><br><span class="line">    validateNamedParameters(paramMap);  </span><br><span class="line">    Object[] parameters = NamedParameterUtils.buildValueArray(getSql(), paramMap);  </span><br><span class="line">    RowMapper rowMapper = newRowMapper(parameters, context);  </span><br><span class="line">    String sqlToUse = NamedParameterUtils.substituteNamedParameters(getSql(), <span class="keyword">new</span> MapSqlParameterSource(paramMap));  </span><br><span class="line">    <span class="comment">//我们又看到了JdbcTemplate,这里使用JdbcTemplate来完成对数据库的查询操作，所以我们说JdbcTemplate是基本的操作类。  </span></span><br><span class="line">     <span class="keyword">return</span> getJdbcTemplate().query(newPreparedStatementCreator(sqlToUse, parameters), rowMapper);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>在这里我们可以看到template模式的精彩应用和对JdbcTemplate的灵活使用。通过使用它，我们免去了手工迭代ResultSet并将其中的数据转化为对象列表的重复过程。在这里我们只需要定义SQL语句和SqlParameter - 如果需要的话，往往SQL语句就常常能够满足我们的要求了。这是灵活使用JdbcTemplate的一个很好的例子。<br>Spring还为其他数据库操作提供了许多服务，比如使用SqlUpdate插入和更新数据库，使用UpdatableSqlQuery更新ResultSet，生成主键，调用存储过程等。<br>书中还给出了对BLOB数据和CLOB数据进行数据库操作的例子：<br>对BLOB数据的操作通过LobHander来完成，通过调用JdbcTemplate和RDBMS都可以进行操作：<br>在JdbcTemplate中，具体的调用可以参考书中的例子 - 是通过以下调用起作用的：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">execute</span><span class="params">(String sql, PreparedStatementCallback action)</span> <span class="keyword">throws</span> DataAccessException </span>&#123;  </span><br><span class="line">    <span class="keyword">return</span> execute(<span class="keyword">new</span> SimplePreparedStatementCreator(sql), action);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>然后通过对实现PreparedStatementCallback接口的AbstractLobCreatingPreparedStatementCallback的回调函数来完成：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> Object <span class="title">doInPreparedStatement</span><span class="params">(PreparedStatement ps)</span> <span class="keyword">throws</span> SQLException, DataAccessException </span>&#123;  </span><br><span class="line">    LobCreator lobCreator = <span class="keyword">this</span>.lobHandler.getLobCreator();  </span><br><span class="line">    <span class="keyword">try</span> &#123;  </span><br><span class="line">        <span class="comment">//这是一个模板方法，具体需要由客户程序实现  </span></span><br><span class="line">        setValues(ps, lobCreator);  </span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Integer(ps.executeUpdate());  </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">finally</span> &#123;  </span><br><span class="line">        lobCreator.close();  </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//定义的需要客户程序实现的虚函数  </span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">setValues</span><span class="params">(PreparedStatement ps, LobCreator lobCreator)</span>  </span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> SQLException, DataAccessException</span>;</span><br></pre></td></tr></table></figure></p>
+<p>而我们注意到setValues()是一个需要实现的抽象方法，应用程序通过实现setValues来定义自己的操作 - 在setValues中调用lobCreator.setBlobAsBinaryStrem()。让我们看看具体的BLOB操作在LobCreator是怎样完成的，我们一般使用DefaultLobCreator作为BLOB操作的驱动：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setBlobAsBinaryStream</span><span class="params">(  </span></span></span><br><span class="line"><span class="function"><span class="params">        PreparedStatement ps, <span class="keyword">int</span> paramIndex, InputStream binaryStream, <span class="keyword">int</span> contentLength)</span>  </span></span><br><span class="line"><span class="function">        <span class="keyword">throws</span> SQLException </span>&#123;  </span><br><span class="line">    <span class="comment">//通过JDBC来完成对BLOB数据的操作，对Oracle,Spring提供了OracleLobHandler来支持BLOB操作。  </span></span><br><span class="line">    ps.setBinaryStream(paramIndex, binaryStream, contentLength);  </span><br><span class="line">    ........  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面提到的是零零碎碎的Spring JDBC使用的例子，可以看到使用Spring JDBC可以帮助我们完成许多数据库的操作。Spring对数据库操作最基本的服务是通过JdbcTeamplate和他常用的回调函数来实现的，在此之上，又提供了许多RMDB的操作来帮助我们更便利的对数据库的数据进行操作 - 注意这里没有引入向Hibernate这样的O/R方案。对这些O/R方案的支持，Spring由其他包来完成服务。<br>书中还提到关于execute和update方法之间的区别，update方法返回的是受影响的记录数目的一个计数，并且如果传入参数的话，使用的是java.sql.PreparedStatement,而execute方法总是使用 java.sql.Statement,不接受参数，而且他不返回受影响记录的计数，更适合于创建和丢弃表的语句，而update方法更适合于插入，更新和删除操作，这也是我们在使用时需要注意的。 </p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-wepay.jpg" alt="Ivan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-alipay.jpg" alt="Ivan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spring/" rel="tag"># Spring</a>
+          
+            <a href="/tags/源码解析/" rel="tag"># 源码解析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2012/03/02/spring-yuan-ma-jie-du-mvc/" rel="next" title="Spring源码解读——MVC">
+                <i class="fa fa-chevron-left"></i> Spring源码解读——MVC
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2012/03/28/spring-aop-qie-dian-biao-da-shi/" rel="prev" title="Spring AOP 切点表达式">
+                Spring AOP 切点表达式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/348097?s=460&v=4" alt="Ivan">
+            
+              <p class="site-author-name" itemprop="name">Ivan</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">104</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">99</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/huangfengjing" title="GitHub &rarr; https://github.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:huangfengjing@gmail.com" title="E-Mail &rarr; mailto:huangfengjing@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/huangfengjing" title="Weibo &rarr; https://weibo.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://plus.google.com/huangfengjing" title="Google &rarr; https://plus.google.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/huangfengjing" title="Twitter &rarr; https://twitter.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.facebook.com/huangfengjing" title="FB Page &rarr; https://www.facebook.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-facebook"></i>FB Page</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ivan</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'sPghJWhcIktqFoKTHCULrW4R-gzGzoHsz',
+    appKey: 'BlHUFUqfO9HAKGSBaWWNuTUi',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

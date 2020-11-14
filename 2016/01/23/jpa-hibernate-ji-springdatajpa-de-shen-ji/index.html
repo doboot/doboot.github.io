@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css">
+
+<link href="https://fonts.cat.net/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1.概述在ORM的框架中，数据库审计一般是指跟踪和记录与持久化实体相关的事件，或者仅仅是实体版本跟踪。受SQL触发器的启发，事件是对实体的插入，更新和删除操作，类似于源码版本控制。 我们将演示三种不同的审计方法。首先，我们将使用标准JPA实现它，接下来，我们将看两个提供自己的审计功能的JPA扩展：一个由Hibernate提供，另一个由Spring Data提供。 以下是将在此示例中使用的示例相关实">
+<meta name="keywords" content="JPA,数据审计">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JPA,Hibernate及SpringDataJPA 的审计">
+<meta property="og:url" content="http://doboot.github.io/2016/01/23/jpa-hibernate-ji-springdatajpa-de-shen-ji/index.html">
+<meta property="og:site_name" content="Ivan&#39;s Blog">
+<meta property="og:description" content="1.概述在ORM的框架中，数据库审计一般是指跟踪和记录与持久化实体相关的事件，或者仅仅是实体版本跟踪。受SQL触发器的启发，事件是对实体的插入，更新和删除操作，类似于源码版本控制。 我们将演示三种不同的审计方法。首先，我们将使用标准JPA实现它，接下来，我们将看两个提供自己的审计功能的JPA扩展：一个由Hibernate提供，另一个由Spring Data提供。 以下是将在此示例中使用的示例相关实">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://doboot.github.io/images/pasted-107.png">
+<meta property="og:updated_time" content="2020-11-14T06:10:20.920Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JPA,Hibernate及SpringDataJPA 的审计">
+<meta name="twitter:description" content="1.概述在ORM的框架中，数据库审计一般是指跟踪和记录与持久化实体相关的事件，或者仅仅是实体版本跟踪。受SQL触发器的启发，事件是对实体的插入，更新和删除操作，类似于源码版本控制。 我们将演示三种不同的审计方法。首先，我们将使用标准JPA实现它，接下来，我们将看两个提供自己的审计功能的JPA扩展：一个由Hibernate提供，另一个由Spring Data提供。 以下是将在此示例中使用的示例相关实">
+<meta name="twitter:image" content="http://doboot.github.io/images/pasted-107.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Ivan's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://doboot.github.io/2016/01/23/jpa-hibernate-ji-springdatajpa-de-shen-ji/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>JPA,Hibernate及SpringDataJPA 的审计 | Ivan's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ivan's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">虽日暮途远，仍梦想诗和远方</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://doboot.github.io/2016/01/23/jpa-hibernate-ji-springdatajpa-de-shen-ji/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ivan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/348097?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ivan's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JPA,Hibernate及SpringDataJPA 的审计
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2016-01-23 20:08:00" itemprop="dateCreated datePublished" datetime="2016-01-23T20:08:00+08:00">2016-01-23</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-14 14:10:20" itemprop="dateModified" datetime="2020-11-14T14:10:20+08:00">2020-11-14</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2016/01/23/jpa-hibernate-ji-springdatajpa-de-shen-ji/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2016/01/23/jpa-hibernate-ji-springdatajpa-de-shen-ji/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">6.8k</span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1.概述"></a>1.概述</h2><p>在ORM的框架中，数据库审计一般是指跟踪和记录与持久化实体相关的事件，或者仅仅是实体版本跟踪。受SQL触发器的启发，事件是对实体的插入，更新和删除操作，类似于源码版本控制。</p>
+<p>我们将演示三种不同的审计方法。首先，我们将使用标准JPA实现它，接下来，我们将看两个提供自己的审计功能的JPA扩展：一个由Hibernate提供，另一个由Spring Data提供。</p>
+<p>以下是将在此示例中使用的示例相关实体<em>Bar</em>和<em>Foo</em>：</p>
+<p><img src="/images/pasted-107.png" alt="upload successful"></p>
+<a id="more"></a>
+<h2 id="2-使用JPA进行审计"><a href="#2-使用JPA进行审计" class="headerlink" title="2. 使用JPA进行审计"></a>2. 使用JPA进行审计</h2><p>JPA没有明确包含审计API，但可以使用实体生命周期事件来实现功能。</p>
+<h3 id="2-1-PrePersist，-PreUpdate-和-PreRemove"><a href="#2-1-PrePersist，-PreUpdate-和-PreRemove" class="headerlink" title="2.1 @PrePersist， @PreUpdate 和 @PreRemove"></a>2.1 <em>@PrePersist</em>， <em>@PreUpdate</em> 和 <em>@PreRemove</em></h3><p>在JPA <em>Entity</em>类中，实体对象生命周期在发生变化时会有相应的事件回调，比如相应的DML操作之前执行的回调，有<em>@PrePersist</em>，<em>@PreUpdate</em>和<em>@PreRemove</em> 分别对于 <strong>持久化前</strong>，<strong>更新前</strong>以及<strong>删除前</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Bar</span> </span>&#123;</span><br><span class="line">       </span><br><span class="line">    <span class="meta">@PrePersist</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPrePersist</span><span class="params">()</span> </span>&#123; ... &#125;</span><br><span class="line">       </span><br><span class="line">    <span class="meta">@PreUpdate</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPreUpdate</span><span class="params">()</span> </span>&#123; ... &#125;</span><br><span class="line">       </span><br><span class="line">    <span class="meta">@PreRemove</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPreRemove</span><span class="params">()</span> </span>&#123; ... &#125;</span><br><span class="line">       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这些内部回调方法没有返回值，且没有参数，它们可以具有任何名称和任何访问级别，但不应该是静态的。</p>
+<blockquote>
+<p>请注意，JPA 中的 <em>@Version</em> 注解与我们的主题不一样 - 它与乐观锁定相关，而不是与审计数据相关。</p>
+</blockquote>
+<h3 id="2-2-实现回调方法"><a href="#2-2-实现回调方法" class="headerlink" title="2.2 实现回调方法"></a>2.2 实现回调方法</h3><p>上一节提到的方法有一个限制，JPA 2 specification (JSR 317) 的相关描述如下：</p>
+<blockquote>
+<p>In general, the lifecycle method of a portable application should not invoke EntityManager or Query operations, access other entity instances, or modify relationships within the same persistence context. A lifecycle callback method may modify the non-relationship state of the entity on which it is invoked.</p>
+</blockquote>
+<p>意思就是生命周期回调方法不应该调用 <em>EntityManager</em> 或者 <em>Query</em> 的操作去修改其它的实例或者实例的关联关系。</p>
+<p>在没有审计框架的情况下，我们必须手动维护数据库架构和域模型。对于我们的简单用例，让我们向实体添加两个新属性，因为我们只能管理“实体的非关系状态”。<em>operation</em> 属性将存储执行的操作的名称，<em>timestamp</em>属性是操作的时间戳：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Bar</span> </span>&#123;</span><br><span class="line">      </span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">      </span><br><span class="line">    <span class="meta">@Column</span>(name = <span class="string">"operation"</span>)</span><br><span class="line">    <span class="keyword">private</span> String operation;</span><br><span class="line">      </span><br><span class="line">    <span class="meta">@Column</span>(name = <span class="string">"timestamp"</span>)</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> timestamp;</span><br><span class="line">      </span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">      </span><br><span class="line">    <span class="comment">// standard setters and getters for the new properties</span></span><br><span class="line">      </span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">      </span><br><span class="line">    <span class="meta">@PrePersist</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPrePersist</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        audit(<span class="string">"INSERT"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">      </span><br><span class="line">    <span class="meta">@PreUpdate</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPreUpdate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        audit(<span class="string">"UPDATE"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">      </span><br><span class="line">    <span class="meta">@PreRemove</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onPreRemove</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        audit(<span class="string">"DELETE"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">      </span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">audit</span><span class="params">(String operation)</span> </span>&#123;</span><br><span class="line">        setOperation(operation);</span><br><span class="line">        setTimestamp((<span class="keyword">new</span> Date()).getTime());</span><br><span class="line">    &#125;</span><br><span class="line">      </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果需要将此类审计添加到多个类，则可以使用 <em>@EntityListeners</em> 来集中代码。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EntityListeners</span>(AuditListener<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">@<span class="title">Entity</span></span></span><br><span class="line"><span class="class"><span class="title">public</span> <span class="title">class</span> <span class="title">Bar</span> </span>&#123; ... &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AuditListener</span> </span>&#123;</span><br><span class="line">     </span><br><span class="line">    <span class="meta">@PrePersist</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">beforePersist</span><span class="params">(Object object)</span> </span>&#123; ... &#125;</span><br><span class="line">    </span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-Hibernate-Envers"><a href="#3-Hibernate-Envers" class="headerlink" title="3. Hibernate Envers"></a>3. Hibernate Envers</h2><p>如果使用 Hibernate 框架，我们可以使用<em>Interceptor</em> 和 <em>EventListeners</em> 以及数据库触发器来完成审计。但是ORM框架提供了Envers，这是一个实现持久化类的审计和版本控制的模块。</p>
+<h3 id="3-1-Envers入门"><a href="#3-1-Envers入门" class="headerlink" title="3.1 Envers入门"></a>3.1 Envers入门</h3><p>要启用Envers，需要添加<em>hibernate-envers</em> 依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.hibernate<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hibernate-envers<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;hibernate.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>然后在<em>@Entity</em>或特定的<em>@Column</em>上添加<em>@Audited</em>注释（如果您只需要审计特定属性）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@Audited</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Bar</span> </span>&#123; ... &#125;</span><br></pre></td></tr></table></figure>
+<p>请注意，<em>Bar</em>与<em>Foo有</em>一对多的关系。在这种情况下，我们要么通过在<em>Foo</em>上添加<em>@Audited</em>或在<em>Bar</em>的关系属性上设置<em>@NotAudited</em>来审计<em>Foo</em>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@OneToMany</span>(mappedBy = <span class="string">"bar"</span>)</span><br><span class="line"><span class="meta">@NotAudited</span></span><br><span class="line"><span class="keyword">private</span> Set&lt;Foo&gt; fooSet;</span><br></pre></td></tr></table></figure>
+<h3 id="3-2-创建审计日志表"><a href="#3-2-创建审计日志表" class="headerlink" title="3.2 创建审计日志表"></a>3.2 创建审计日志表</h3><p>有几种方法可以创建审计表：</p>
+<ul>
+<li>设置<em>hibernate.hbm2ddl.auto=create, create-drop or update</em>，这样Envers就可以自动创建它们</li>
+<li>使用o <em>rg.hibernate.tool.EnversSchemaGenerator</em>以编程方式导出完整的数据库Schema</li>
+<li>使用Ant任务生成适当的DDL语句</li>
+<li>使用Maven插件从映射（例如Juplo）生成数据库模式以导出Envers模式（与Hibernate 4及更高版本一起使用）</li>
+</ul>
+<blockquote>
+<p>注意使用<em>hibernate.hbm2ddl.auto</em>在生产中是不安全的。</p>
+</blockquote>
+<p>在我们的例子中，<em>bar_AUD</em>和<em>foo_AUD</em>（如果你将<em>Foo</em>设置为<em>@Audited</em>）表应该自动生成。审计表从实体表中复制所有审计字段，其中包含两个字段<em>REVTYPE</em>（值为：“0”表示添加，“1”表示更新，“2”表示删除实体）和<em>REV</em>。</p>
+<p>除此之外，默认会生成一个名为<em>REVINFO</em>的表，它包括两个重要的字段<em>REV</em>和<em>REVTSTMP</em>，记录每次修改的时间戳。正如你猜测的那样，<em>bar_AUD.REV</em>和<em>foo_AUD.REV</em>实际上是<em>REVINFO.REV</em>的外键。</p>
+<h3 id="3-3-配置Envers"><a href="#3-3-配置Envers" class="headerlink" title="3.3 配置Envers"></a>3.3 配置Envers</h3><p>您可以像任何其他Hibernate属性一样配置Envers属性。例如，让我们将审计表后缀（默认为“ <em>_AUD</em> ”）更改为“ <em>_AUDIT_LOG</em> ”。比如设置相应属性<em>org.hibernate.envers.audit_table_suffix</em>的值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Properties hibernateProperties = <span class="keyword">new</span> Properties(); </span><br><span class="line">hibernateProperties.setProperty(</span><br><span class="line">  <span class="string">"org.hibernate.envers.audit_table_suffix"</span>, <span class="string">"_AUDIT_LOG"</span>); </span><br><span class="line">sessionFactory.setHibernateProperties(hibernateProperties);</span><br></pre></td></tr></table></figure>
+<p>在<a href="http://docs.jboss.org/envers/docs/#configuration" target="_blank" rel="noopener">Envers文档中</a>找到可用属性的完整列表。</p>
+<h3 id="3-4-访问实体历史记录"><a href="#3-4-访问实体历史记录" class="headerlink" title="3.4 访问实体历史记录"></a>3.4 访问实体历史记录</h3><p>您可以通过类似于通过Hibernate条件API查询数据的方式查询历史数据。实体的审计历史记录可以使用<em>AuditReader</em> 接口访问，这个接口可以通过 <em>的EntityManager</em> 或<em>Session</em> 获取，如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AuditReader reader = AuditReaderFactory.get(session);</span><br></pre></td></tr></table></figure>
+<p>Envers提供<em>AuditQueryCreator</em>（由<em>AuditReader.createQuery()</em>返回）创建特定于审计的查询，如以所示将返回在修订版＃2中修改的所有<em>Bar</em>实例（其中<em>bar_AUDIT_LOG.REV = 2</em>）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">AuditQuery query = reader.createQuery().forEntitiesAtRevision(Bar<span class="class">.<span class="keyword">class</span>, 2)</span></span><br></pre></td></tr></table></figure>
+<p>以下是如何查询<em>Bar</em>的修订版，即它将导致获取所有审计状态中所有<em>Bar</em>实例的列表：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">AuditQuery query = reader.createQuery().forRevisionsOfEntity(Bar<span class="class">.<span class="keyword">class</span>, <span class="title">true</span>, <span class="title">true</span>)</span>;</span><br></pre></td></tr></table></figure>
+<p>如果第二个参数为false，则结果还会 join <em>REVINFO</em>表，否则，仅返回实体实例。最后一个参数指定是否返回已删除的<em>Bar</em>实例。</p>
+<p>还可以使用 <em>AuditEntity</em> 工厂类指定约束：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">query.addOrder(AuditEntity.revisionNumber().desc());</span><br></pre></td></tr></table></figure></p>
+<h2 id="4-Spring-Data-JPA"><a href="#4-Spring-Data-JPA" class="headerlink" title="4. Spring Data JPA"></a>4. Spring Data JPA</h2><p>Spring Data JPA 是一个通过在JPA提供程序的顶部添加额外的抽象层来扩展JPA的框架。我们可以扩展<em>CrudRepository &lt;T，ID extends Serializable&gt;</em>，用于通用CRUD操作的接口。一旦您创建了 Repository 并将其注入另一个组件，Spring Data就会自动提供实现，您就可以添加审计功能了。</p>
+<h3 id="4-1-启用JPA审计"><a href="#4-1-启用JPA审计" class="headerlink" title="4.1 启用JPA审计"></a>4.1 启用JPA审计</h3><p>只需在 <em>@Configuration</em> 类上添加 <em>@EnableJpaAuditing</em> 即可启用 JPA 审计，如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@EnableTransactionManagement</span></span><br><span class="line"><span class="meta">@EnableJpaRepositories</span></span><br><span class="line"><span class="meta">@EnableJpaAuditing</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PersistenceConfig</span> </span>&#123; ... &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="4-2-添加Spring的实体回调监听器"><a href="#4-2-添加Spring的实体回调监听器" class="headerlink" title="4.2 添加Spring的实体回调监听器"></a>4.2 添加Spring的实体回调监听器</h3><p>我们已经知道，JPA提供<em>@EntityListeners</em> 注释来指定回调监听类。Spring Data 也提供了自己的JPA实体监听器类：<em>AuditingEntityListener</em>。所以让我们为<em>Bar</em> 实体指定监听器，如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@EntityListeners</span>(AuditingEntityListener<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class"><span class="title">public</span> <span class="title">class</span> <span class="title">Bar</span> </span>&#123; ... &#125;</span><br></pre></td></tr></table></figure>
+<p>现在，监听器将在持久化和更新<em>Bar</em>实体时捕获审计信息。</p>
+<h3 id="4-3-跟踪创建的和上次修改的日期"><a href="#4-3-跟踪创建的和上次修改的日期" class="headerlink" title="4.3 跟踪创建的和上次修改的日期"></a>4.3 跟踪创建的和上次修改的日期</h3><p>接下来，我们将添加两个新属性，用于将创建和最后修改日期存储到<em>Bar</em>实体。这些属性由<em>@CreatedDate</em>和<em>@LastModifiedDate</em> 进行注解：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Entity</span></span><br><span class="line"><span class="meta">@EntityListeners</span>(AuditingEntityListener<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class"><span class="title">public</span> <span class="title">class</span> <span class="title">Bar</span> </span>&#123;</span><br><span class="line">     </span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">     </span><br><span class="line">    <span class="meta">@Column</span>(name = <span class="string">"created_date"</span>, nullable = <span class="keyword">false</span>, updatable = <span class="keyword">false</span>)</span><br><span class="line">    <span class="meta">@CreatedDate</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> createdDate;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Column</span>(name = <span class="string">"modified_date"</span>)</span><br><span class="line">    <span class="meta">@LastModifiedDate</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> modifiedDate;</span><br><span class="line">     </span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通常，可以将这几个属性移动到基类（由<em>@MappedSuperClass</em>注释），该基类将由所有审计实体继承。在我们的示例中，为简单起见，我们将它们直接添加到<em>Bar</em>。</p>
+<h3 id="4-4-审计更改的作者"><a href="#4-4-审计更改的作者" class="headerlink" title="4.4 审计更改的作者"></a>4.4 审计更改的作者</h3><p>您不仅可以跟踪何时进行更改，还可以跟踪谁进行了修改，同样的，添加两个属性，并由 <em>@CreatedBy</em> 和 <em>@LastModifiedBy</em> 进行注解：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">  <span class="comment">//...</span></span><br><span class="line">   </span><br><span class="line">  <span class="meta">@Column</span>(name = <span class="string">"created_by"</span>)</span><br><span class="line">  <span class="meta">@CreatedBy</span></span><br><span class="line">  <span class="keyword">private</span> String createdBy;</span><br><span class="line"> </span><br><span class="line">  <span class="meta">@Column</span>(name = <span class="string">"modified_by"</span>)</span><br><span class="line">  <span class="meta">@LastModifiedBy</span></span><br><span class="line">  <span class="keyword">private</span> String modifiedBy;</span><br><span class="line">   </span><br><span class="line"><span class="comment">//</span></span><br></pre></td></tr></table></figure>
+<p>使用<em>@CreatedBy</em>和<em>@LastModifiedBy</em>注释的列将自动填充创建或上次修改实体的作者。当然，该作者信息需要开发者自己提供。实际上框架是会查找 Spring 上下文中的 <em>AuditorAware <t></t></em>接口实现才，并调用其 <em>getCurrentAuditor()</em> 方法，定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AuditorAwareImpl</span> <span class="keyword">implements</span> <span class="title">AuditorAware</span>&lt;<span class="title">String</span>&gt; </span>&#123;</span><br><span class="line">  </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getCurrentAuditor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// your custom logic</span></span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>根据不同的情况，可以从 Session 或者 <em>SpringSecurity</em> 框架的 Principal 中获取当前登录用户信息</p>
+</blockquote>
+<p>为了配置该应用使用<em>AuditorAwareImpl</em>查找当前主体，<em>@EnableJpaAuditing</em> 中可以设置 <em>auditorAwareRef</em>属性为我们前面提到的 <em>AuditorAware</em> 实现类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@EnableJpaAuditing</span>(auditorAwareRef=<span class="string">"auditorProvider"</span>)</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PersistenceConfig</span> </span>&#123;</span><br><span class="line">     </span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">     </span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function">AuditorAware&lt;String&gt; <span class="title">auditorProvider</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> AuditorAwareImpl();</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    <span class="comment">//...</span></span><br><span class="line">     </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-wepay.jpg" alt="Ivan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-alipay.jpg" alt="Ivan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JPA/" rel="tag"># JPA</a>
+          
+            <a href="/tags/数据审计/" rel="tag"># 数据审计</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/12/java-zhong-de-zhu-jie-chu-li-qi/" rel="next" title="Java中的注解处理器">
+                <i class="fa fa-chevron-left"></i> Java中的注解处理器
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/26/spring-controller-zhuang-tai-ma/" rel="prev" title="Spring Controller 状态码">
+                Spring Controller 状态码 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/348097?s=460&v=4" alt="Ivan">
+            
+              <p class="site-author-name" itemprop="name">Ivan</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">104</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">99</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/huangfengjing" title="GitHub &rarr; https://github.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:huangfengjing@gmail.com" title="E-Mail &rarr; mailto:huangfengjing@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/huangfengjing" title="Weibo &rarr; https://weibo.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://plus.google.com/huangfengjing" title="Google &rarr; https://plus.google.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/huangfengjing" title="Twitter &rarr; https://twitter.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.facebook.com/huangfengjing" title="FB Page &rarr; https://www.facebook.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-facebook"></i>FB Page</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-概述"><span class="nav-text">1.概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-使用JPA进行审计"><span class="nav-text">2. 使用JPA进行审计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-PrePersist，-PreUpdate-和-PreRemove"><span class="nav-text">2.1 @PrePersist， @PreUpdate 和 @PreRemove</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-实现回调方法"><span class="nav-text">2.2 实现回调方法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Hibernate-Envers"><span class="nav-text">3. Hibernate Envers</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Envers入门"><span class="nav-text">3.1 Envers入门</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-创建审计日志表"><span class="nav-text">3.2 创建审计日志表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-配置Envers"><span class="nav-text">3.3 配置Envers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-访问实体历史记录"><span class="nav-text">3.4 访问实体历史记录</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Spring-Data-JPA"><span class="nav-text">4. Spring Data JPA</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-启用JPA审计"><span class="nav-text">4.1 启用JPA审计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-添加Spring的实体回调监听器"><span class="nav-text">4.2 添加Spring的实体回调监听器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-跟踪创建的和上次修改的日期"><span class="nav-text">4.3 跟踪创建的和上次修改的日期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-审计更改的作者"><span class="nav-text">4.4 审计更改的作者</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ivan</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'sPghJWhcIktqFoKTHCULrW4R-gzGzoHsz',
+    appKey: 'BlHUFUqfO9HAKGSBaWWNuTUi',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

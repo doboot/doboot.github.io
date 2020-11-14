@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css">
+
+<link href="https://fonts.cat.net/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="闲来无事翻了下以前写的项目，发现一个还算不错的东西，就是基于约定的Spring MVC扩展，这段代码是好早以前的东西了（大概四五年了吧），那个时候Spring还远没有现在这么“强大”，哦不，应该说是杂，现在的Spring似乎无所不能，却再也不那么专注了，基于让我有点怀念Spring1.X时代了。 这个扩展是当时没有Annotation时代，为了解决XML配置文件膨胀而产生的，原理很简单，就是依据请">
+<meta name="keywords" content="Spring">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于约定的Spring MVC扩展">
+<meta property="og:url" content="http://doboot.github.io/2009/11/11/ji-yu-yue-ding-de-spring-mvc-kuo-zhan/index.html">
+<meta property="og:site_name" content="Ivan&#39;s Blog">
+<meta property="og:description" content="闲来无事翻了下以前写的项目，发现一个还算不错的东西，就是基于约定的Spring MVC扩展，这段代码是好早以前的东西了（大概四五年了吧），那个时候Spring还远没有现在这么“强大”，哦不，应该说是杂，现在的Spring似乎无所不能，却再也不那么专注了，基于让我有点怀念Spring1.X时代了。 这个扩展是当时没有Annotation时代，为了解决XML配置文件膨胀而产生的，原理很简单，就是依据请">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-14T06:10:20.960Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于约定的Spring MVC扩展">
+<meta name="twitter:description" content="闲来无事翻了下以前写的项目，发现一个还算不错的东西，就是基于约定的Spring MVC扩展，这段代码是好早以前的东西了（大概四五年了吧），那个时候Spring还远没有现在这么“强大”，哦不，应该说是杂，现在的Spring似乎无所不能，却再也不那么专注了，基于让我有点怀念Spring1.X时代了。 这个扩展是当时没有Annotation时代，为了解决XML配置文件膨胀而产生的，原理很简单，就是依据请">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Ivan's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://doboot.github.io/2009/11/11/ji-yu-yue-ding-de-spring-mvc-kuo-zhan/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>基于约定的Spring MVC扩展 | Ivan's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ivan's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">虽日暮途远，仍梦想诗和远方</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://doboot.github.io/2009/11/11/ji-yu-yue-ding-de-spring-mvc-kuo-zhan/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ivan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/348097?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ivan's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于约定的Spring MVC扩展
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2009-11-11 11:09:00" itemprop="dateCreated datePublished" datetime="2009-11-11T11:09:00+08:00">2009-11-11</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-14 14:10:20" itemprop="dateModified" datetime="2020-11-14T14:10:20+08:00">2020-11-14</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/源码扩展/" itemprop="url" rel="index"><span itemprop="name">源码扩展</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2009/11/11/ji-yu-yue-ding-de-spring-mvc-kuo-zhan/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2009/11/11/ji-yu-yue-ding-de-spring-mvc-kuo-zhan/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">13k</span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>闲来无事翻了下以前写的项目，发现一个还算不错的东西，就是基于约定的Spring MVC扩展，这段代码是好早以前的东西了（大概四五年了吧），那个时候Spring还远没有现在这么“强大”，哦不，应该说是杂，现在的Spring似乎无所不能，却再也不那么专注了，基于让我有点怀念Spring1.X时代了。</p>
+<p>这个扩展是当时没有Annotation时代，为了解决XML配置文件膨胀而产生的，原理很简单，就是依据请求的urlPath，动态的解析到所对应的处理类，然后实例化处理类，注入所需要的依赖，再执行。帖出来怀念一下。</p>
+<a id="more"></a>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cn.edu.ccnu.inc.webtemplate.spring.mvc;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">import</span> java.util.Map;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">import</span> javax.servlet.http.HttpServletRequest;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.BeansException;  </span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.BeanFactoryUtils;  </span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.factory.InitializingBean;  </span><br><span class="line"><span class="keyword">import</span> org.springframework.util.Assert;  </span><br><span class="line"><span class="keyword">import</span> org.springframework.util.StringUtils;  </span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;  </span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.mvc.multiaction.InternalPathMethodNameResolver;  </span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.mvc.multiaction.MethodNameResolver;  </span><br><span class="line"><span class="keyword">import</span> org.springframework.web.servlet.mvc.multiaction.MultiActionController;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">import</span> cn.edu.ccnu.inc.webtemplate.cache.SystemCacheManager;  </span><br><span class="line"><span class="keyword">import</span> cn.edu.ccnu.inc.webtemplate.util.ClassUtils;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment"> * Convention based url handler mapping, to find a handle class based on the url hierarchy if no </span></span><br><span class="line"><span class="comment"> * handler found with the mapping-configuration. </span></span><br><span class="line"><span class="comment"> * Example: </span></span><br><span class="line"><span class="comment"> * &amp;lt;bean id="urlMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"&amp;gt; </span></span><br><span class="line"><span class="comment"> *      &amp;lt;property name="defaultHandler"&amp;gt; </span></span><br><span class="line"><span class="comment"> *           &amp;lt;!-- It also could configure a reference to an exist handler --&amp;gt; </span></span><br><span class="line"><span class="comment"> *          &amp;lt;bean class="org.springframework.web.servlet.mvc.UrlFilenameViewController" /&amp;gt; </span></span><br><span class="line"><span class="comment"> *      &amp;lt;/property&amp;gt; </span></span><br><span class="line"><span class="comment"> *      &amp;lt;property name="packages"&amp;gt; </span></span><br><span class="line"><span class="comment"> *              &amp;lt;value&amp;gt;cn.edu.ccnu.inc.webtemplate.controller, cn.edu.ccnu.inc.webtemplate.spring.controller&amp;lt;/value&amp;gt; </span></span><br><span class="line"><span class="comment"> *      &amp;lt;/property&amp;gt; </span></span><br><span class="line"><span class="comment"> *      &amp;lt;property name="mappings"&amp;gt; </span></span><br><span class="line"><span class="comment"> *          &amp;lt;value&amp;gt; </span></span><br><span class="line"><span class="comment"> *              /login.html = filenameController </span></span><br><span class="line"><span class="comment"> *              /index.html = filenameController </span></span><br><span class="line"><span class="comment"> *              /main.html = filenameController </span></span><br><span class="line"><span class="comment"> *              /security/userManage.html = filenameController </span></span><br><span class="line"><span class="comment"> *              /security/roleManage.html = filenameController </span></span><br><span class="line"><span class="comment"> *          &amp;lt;/value&amp;gt; </span></span><br><span class="line"><span class="comment"> *      &amp;lt;/property&amp;gt; </span></span><br><span class="line"><span class="comment"> * &amp;lt;/bean&amp;gt; </span></span><br><span class="line"><span class="comment"> * the path "/security/methodPrivilegeManage.html" doesn't match any item of above, so it will be mapped </span></span><br><span class="line"><span class="comment"> * to the security.UserManager class under the package cn.edu.ccnu.inc.webtemplate.controller or under </span></span><br><span class="line"><span class="comment"> * cn.edu.ccnu.inc.webtemplate.spring.controller package to handle. When no controller found with this strategy, </span></span><br><span class="line"><span class="comment"> * a defaultHandler will be used if it is configured(eg.. </span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> &lt;a href="mailto:huangfengjing@gmail.com"&gt;Ivan&lt;/a&gt; </span></span><br><span class="line"><span class="comment"> * <span class="doctag">@created</span> 2005-10-29 下午12:41:30 </span></span><br><span class="line"><span class="comment"> */</span>  </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConventionBasedUrlHandlerMapping</span> <span class="keyword">extends</span> <span class="title">SimpleUrlHandlerMapping</span> <span class="keyword">implements</span> <span class="title">InitializingBean</span> </span>&#123;  </span><br><span class="line">      </span><br><span class="line">    SystemCacheManager systemCacheManager = <span class="keyword">null</span>;  </span><br><span class="line">    <span class="keyword">private</span> String CACHE_NAME_IN_SYSTEM = <span class="string">"_system_cache_handler"</span>;  </span><br><span class="line">      </span><br><span class="line">    <span class="comment">/** Default handler when no handler mapped */</span>  </span><br><span class="line">    <span class="keyword">private</span> Object defaultHandler;  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">/** Packages to look for the Handler class */</span>   </span><br><span class="line">    <span class="keyword">private</span> String packages;  </span><br><span class="line">      </span><br><span class="line">    <span class="comment">/** </span></span><br><span class="line"><span class="comment">     * Config the packages </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> packages </span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setPackages</span><span class="params">(String packages)</span> </span>&#123;  </span><br><span class="line">        <span class="keyword">this</span>.packages = packages;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">/** </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> defaultHandler the defaultHandler to set </span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setDefaultHandler</span><span class="params">(Object defaultHandler)</span> </span>&#123;  </span><br><span class="line">        <span class="keyword">this</span>.defaultHandler = defaultHandler;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">/** </span></span><br><span class="line"><span class="comment">     * Override the default lookup strategy, when the parent can not find an appropriate one to handle. </span></span><br><span class="line"><span class="comment">     * Lookup strategy: </span></span><br><span class="line"><span class="comment">     * 1. ask parent mapping to look up handler. </span></span><br><span class="line"><span class="comment">     * 2. if no handler found, then use url hierarchy build a short name to retrieve the bean as the handler. </span></span><br><span class="line"><span class="comment">     * 3. if still no handler found, assemble a full class name with package and url hierarchy, then load and </span></span><br><span class="line"><span class="comment">     *    initiate a class with reflection, inject all needed properties, finally use this object as the handler. </span></span><br><span class="line"><span class="comment">     * 4. finally, if no handler found through all of above ways, use a default one. </span></span><br><span class="line"><span class="comment">     * 5. if no default handler specified, return null. </span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    <span class="meta">@Override</span>  </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> Object <span class="title">lookupHandler</span><span class="params">(String urlPath, HttpServletRequest request)</span> <span class="keyword">throws</span> Exception </span>&#123;  </span><br><span class="line">        Object handler = <span class="keyword">super</span>.lookupHandler(urlPath, request);  </span><br><span class="line">          </span><br><span class="line">        Map&lt;Object, Object&gt; handlerCache = systemCacheManager.getCache(CACHE_NAME_IN_SYSTEM);  </span><br><span class="line">        <span class="comment">// get handler from the cache  </span></span><br><span class="line">        handler = handlerCache.get(urlPath);  </span><br><span class="line">        <span class="keyword">if</span>(handler != <span class="keyword">null</span>) &#123;  </span><br><span class="line">            <span class="keyword">return</span> handler;  </span><br><span class="line">        &#125;  </span><br><span class="line">          </span><br><span class="line">        <span class="comment">// load the Controller as the handler  </span></span><br><span class="line">        String className;  </span><br><span class="line">        String[] pkgs = StringUtils.commaDelimitedListToStringArray(packages);  </span><br><span class="line">          </span><br><span class="line">        <span class="keyword">for</span>(String pkg : pkgs) &#123;  </span><br><span class="line">            className = pkg + <span class="string">"."</span> + ClassUtils.convertUrlPathToClassName(urlPath, <span class="keyword">true</span>);  </span><br><span class="line">            handler = ClassUtils.loadModelWithApplicationContextFirst(className, getApplicationContext(), <span class="keyword">null</span>);  </span><br><span class="line">              </span><br><span class="line">            <span class="keyword">if</span>((handler != <span class="keyword">null</span> &amp;&amp; handler <span class="keyword">instanceof</span> MultiActionController) &amp;&amp; ((MultiActionController)handler).getMethodNameResolver().getClass().equals(InternalPathMethodNameResolver<span class="class">.<span class="keyword">class</span>)) </span>&#123;  </span><br><span class="line">                <span class="keyword">try</span> &#123;  </span><br><span class="line">                    MethodNameResolver methodNameResolver = (MethodNameResolver)BeanFactoryUtils.beanOfTypeIncludingAncestors(getApplicationContext(), MethodNameResolver<span class="class">.<span class="keyword">class</span>, <span class="title">true</span>, <span class="title">true</span>)</span>;  </span><br><span class="line">                    ((MultiActionController)handler).setMethodNameResolver(methodNameResolver);  </span><br><span class="line">                &#125; <span class="keyword">catch</span> (BeansException be) &#123;  </span><br><span class="line">                    <span class="comment">// ignore  </span></span><br><span class="line">                &#125;  </span><br><span class="line">                <span class="keyword">break</span>;  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;  </span><br><span class="line">              </span><br><span class="line">        <span class="comment">// use the default handler if it is specified  </span></span><br><span class="line">        <span class="keyword">if</span>(handler == <span class="keyword">null</span> &amp;&amp; defaultHandler != <span class="keyword">null</span>) &#123;  </span><br><span class="line">            handler = defaultHandler;  </span><br><span class="line">        &#125;  </span><br><span class="line">          </span><br><span class="line">        <span class="comment">// if find one, put it to the cache  </span></span><br><span class="line">        <span class="keyword">if</span>(handler != <span class="keyword">null</span>) &#123;  </span><br><span class="line">            handlerCache.put(urlPath, handler);  </span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">return</span> handler;  </span><br><span class="line">    &#125;  </span><br><span class="line">      </span><br><span class="line">    <span class="comment">/* (non-Javadoc) </span></span><br><span class="line"><span class="comment">     * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet() </span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;  </span><br><span class="line">        Assert.notNull(packages, <span class="string">"Packages can not be null."</span>);  </span><br><span class="line">        <span class="keyword">if</span>(systemCacheManager == <span class="keyword">null</span>) &#123;  </span><br><span class="line">            systemCacheManager = (SystemCacheManager)BeanFactoryUtils.beanOfTypeIncludingAncestors(getApplicationContext(), SystemCacheManager<span class="class">.<span class="keyword">class</span>)</span>;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> cn.edu.ccnu.inc.webtemplate.util;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Field;  </span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;  </span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Modifier;  </span><br><span class="line">  </span><br><span class="line"><span class="keyword">import</span> org.springframework.beans.BeansException;  </span><br><span class="line"><span class="keyword">import</span> org.springframework.context.ApplicationContext;  </span><br><span class="line"><span class="keyword">import</span> org.springframework.util.ReflectionUtils.FieldFilter;  </span><br><span class="line">  </span><br><span class="line"><span class="comment">/** </span></span><br><span class="line"><span class="comment"> *  </span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> &lt;a href="mailto:huangfengjing@gmail.com"&gt;Ivan&lt;/a&gt; </span></span><br><span class="line"><span class="comment"> * <span class="doctag">@created</span> 2005-11-1 上午12:40:04 </span></span><br><span class="line"><span class="comment"> */</span>  </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">ClassUtils</span> <span class="keyword">extends</span> <span class="title">org</span>.<span class="title">springframework</span>.<span class="title">util</span>.<span class="title">ClassUtils</span> </span>&#123;  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">/** </span></span><br><span class="line"><span class="comment">     * Normalize the control/userManage.html/.htm/.jsp/.vm... name to the standard </span></span><br><span class="line"><span class="comment">     * class name like control.UserManage  </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> urlPath </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> </span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">convertUrlPathToClassName</span><span class="params">(String urlPath, <span class="keyword">boolean</span> hasSuffix)</span> </span>&#123;  </span><br><span class="line">        <span class="keyword">if</span>(urlPath.startsWith(<span class="string">"/"</span>)) &#123;  </span><br><span class="line">            urlPath = urlPath.substring(<span class="number">1</span>);  </span><br><span class="line">        &#125;  </span><br><span class="line">        urlPath = urlPath.replaceAll(<span class="string">"/"</span>, <span class="string">"."</span>);  </span><br><span class="line">          </span><br><span class="line">        <span class="keyword">int</span> index = urlPath.length();  </span><br><span class="line">        <span class="keyword">if</span>(hasSuffix) &#123;  </span><br><span class="line">            <span class="comment">// get rid of resource suffix such as .html/.htm/.jsp/.vm and so no  </span></span><br><span class="line">            index = urlPath.lastIndexOf(<span class="string">"."</span>);  </span><br><span class="line">            <span class="keyword">if</span>(index &lt; <span class="number">0</span>) &#123;  </span><br><span class="line">                <span class="keyword">return</span> <span class="string">""</span>;  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;  </span><br><span class="line">          </span><br><span class="line">        String handlerName = urlPath.substring(<span class="number">0</span>, index);  </span><br><span class="line">        index = handlerName.lastIndexOf(<span class="string">"."</span>);  </span><br><span class="line">        StringBuffer sb = <span class="keyword">new</span> StringBuffer(handlerName);  </span><br><span class="line">        <span class="keyword">if</span>(index &lt; handlerName.length() &amp;&amp; Character.isLowerCase(handlerName.charAt(index + <span class="number">1</span>))) &#123;  </span><br><span class="line">            sb.setCharAt(index + <span class="number">1</span>, Character.toUpperCase(handlerName.charAt(index + <span class="number">1</span>)));  </span><br><span class="line">        &#125;  </span><br><span class="line">          </span><br><span class="line">        <span class="keyword">return</span> sb.toString();  </span><br><span class="line">    &#125;  </span><br><span class="line">      </span><br><span class="line">    <span class="comment">/** </span></span><br><span class="line"><span class="comment">     * Load a module class from application context, if not found, then use reflection to initiate one </span></span><br><span class="line"><span class="comment">     * and inject all it's properties which is not set yet and the value has been configured in context. </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> fullname </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> context </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> </span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">loadModelWithApplicationContextFirst</span><span class="params">(String fullname, ApplicationContext context, FieldFilter filter)</span> </span>&#123;  </span><br><span class="line">        Object model = <span class="keyword">null</span>;  </span><br><span class="line">          </span><br><span class="line">        String shortName = ClassUtils.getShortName(fullname);  </span><br><span class="line">        StringBuffer sb = <span class="keyword">new</span> StringBuffer(shortName);  </span><br><span class="line">        sb.setCharAt(<span class="number">0</span>, Character.toLowerCase(shortName.charAt(<span class="number">0</span>)));  </span><br><span class="line">        <span class="keyword">try</span> &#123;  </span><br><span class="line">            model = context.getBean(sb.toString());  </span><br><span class="line">        &#125; <span class="keyword">catch</span> (BeansException be) &#123;  </span><br><span class="line">            <span class="comment">// ignore  </span></span><br><span class="line">        &#125;  </span><br><span class="line">        <span class="keyword">if</span>(model != <span class="keyword">null</span>) &#123;  </span><br><span class="line">            <span class="keyword">return</span> model;  </span><br><span class="line">        &#125;  </span><br><span class="line">          </span><br><span class="line">        <span class="keyword">try</span> &#123;  </span><br><span class="line">            model = ClassUtils.forName(fullname).newInstance();  </span><br><span class="line">            injectDependencies(model, context, filter);  </span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;  </span><br><span class="line">            <span class="comment">// ignore, continue  </span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (InstantiationException e) &#123;  </span><br><span class="line">            <span class="comment">// ignore, continue  </span></span><br><span class="line">        &#125; <span class="keyword">catch</span> (IllegalAccessException e) &#123;  </span><br><span class="line">            <span class="comment">// ignore, continue  </span></span><br><span class="line">        &#125;  </span><br><span class="line">          </span><br><span class="line">        <span class="keyword">return</span> model;  </span><br><span class="line">    &#125;  </span><br><span class="line">      </span><br><span class="line">    <span class="comment">/** </span></span><br><span class="line"><span class="comment">     * Initialize all the properties which has Setter, the value comes from Spring ApplictionContext </span></span><br><span class="line"><span class="comment">     * By default, the static/final/volatile/native field will no be injected. </span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> bean </span></span><br><span class="line"><span class="comment">     */</span>  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">injectDependencies</span><span class="params">(Object bean, ApplicationContext context, FieldFilter filter)</span> </span>&#123;  </span><br><span class="line">        Method[] methods = ReflectionUtils.getAllDeclaredMethods(bean.getClass());  </span><br><span class="line">        Field[] fields = ReflectionUtils.getAllFields(bean.getClass());  </span><br><span class="line">        <span class="keyword">for</span>(Field field : fields) &#123;  </span><br><span class="line">            <span class="keyword">if</span>(filter == <span class="keyword">null</span>) &#123;  </span><br><span class="line">                filter = <span class="keyword">new</span> FieldFilter() &#123;  </span><br><span class="line">                    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">matches</span><span class="params">(Field field)</span> </span>&#123;  </span><br><span class="line">                        <span class="keyword">int</span> modifier = field.getModifiers();  </span><br><span class="line">                        <span class="keyword">if</span>(Modifier.isStatic(modifier) || Modifier.isFinal(modifier)  </span><br><span class="line">                                || Modifier.isVolatile(modifier) || Modifier.isNative(modifier)) &#123;  </span><br><span class="line">                            <span class="keyword">return</span> <span class="keyword">false</span>;  </span><br><span class="line">                        &#125;  </span><br><span class="line">                        <span class="keyword">return</span> <span class="keyword">true</span>;  </span><br><span class="line">                    &#125;  </span><br><span class="line">                &#125;;  </span><br><span class="line">            &#125;  </span><br><span class="line">            <span class="keyword">if</span>(!filter.matches(field)) &#123;  </span><br><span class="line">                <span class="keyword">continue</span>;  </span><br><span class="line">            &#125;  </span><br><span class="line">            ReflectionUtils.makeAccessible(field);  </span><br><span class="line">            <span class="keyword">try</span> &#123;  </span><br><span class="line">                <span class="keyword">if</span>(field.get(bean) != <span class="keyword">null</span>) &#123;  </span><br><span class="line">                    <span class="keyword">continue</span>;  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;  </span><br><span class="line">                <span class="keyword">continue</span>;  </span><br><span class="line">            &#125;  </span><br><span class="line">              </span><br><span class="line">            <span class="comment">// make sure it has a Setter or we will skip this field  </span></span><br><span class="line">            StringBuffer startdMethodName = <span class="keyword">new</span> StringBuffer(field.getName());  </span><br><span class="line">            startdMethodName.setCharAt(<span class="number">0</span>, Character.toUpperCase(field.getName().charAt(<span class="number">0</span>)));  </span><br><span class="line">            startdMethodName.insert(<span class="number">0</span>, <span class="string">"set"</span>);  </span><br><span class="line">            <span class="keyword">for</span>(Method method : methods) &#123;  </span><br><span class="line">                <span class="keyword">if</span>((startdMethodName.toString()).equals(method.getName())) &#123;  </span><br><span class="line">                    <span class="keyword">try</span> &#123;  </span><br><span class="line">                        ReflectionUtils.invokeMethod(method, bean, <span class="keyword">new</span> Object[] &#123;context.getBean(field.getName())&#125;);  </span><br><span class="line">                        <span class="keyword">break</span>;  </span><br><span class="line">                    &#125; <span class="keyword">catch</span> (BeansException be) &#123;  </span><br><span class="line">                        <span class="comment">// ignore  </span></span><br><span class="line">                    &#125;  </span><br><span class="line">                &#125;  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-wepay.jpg" alt="Ivan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-alipay.jpg" alt="Ivan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spring/" rel="tag"># Spring</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2009/07/07/xian-cheng-chi-de-jian-dan-shi-xian/" rel="next" title="线程池的简单实现">
+                <i class="fa fa-chevron-left"></i> 线程池的简单实现
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2010/04/08/fen-bu-shi-ji-yu-zookeeper-gou-jian-fen-bu-shi-ying-yong/" rel="prev" title="分布式——基于zookeeper构建分布式应用">
+                分布式——基于zookeeper构建分布式应用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <div class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/348097?s=460&v=4" alt="Ivan">
+            
+              <p class="site-author-name" itemprop="name">Ivan</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">104</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">99</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/huangfengjing" title="GitHub &rarr; https://github.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:huangfengjing@gmail.com" title="E-Mail &rarr; mailto:huangfengjing@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/huangfengjing" title="Weibo &rarr; https://weibo.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://plus.google.com/huangfengjing" title="Google &rarr; https://plus.google.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/huangfengjing" title="Twitter &rarr; https://twitter.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.facebook.com/huangfengjing" title="FB Page &rarr; https://www.facebook.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-facebook"></i>FB Page</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ivan</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'sPghJWhcIktqFoKTHCULrW4R-gzGzoHsz',
+    appKey: 'BlHUFUqfO9HAKGSBaWWNuTUi',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css">
+
+<link href="https://fonts.cat.net/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1. 概述What？Feign是一个 Netflix 开发的声明性的Web服务客户端，灵感来源于Retrofit、JAXRS-2.0和WebSocket。Feign 最初是为了降低统一绑定Denominator 到 HTTP API 的复杂度，使得 Java HTTP 客户端编写更方便。Feign 的 MAVEN 直接依赖如下所示： 12345678910&amp;lt;dependency&amp;gt;">
+<meta name="keywords" content="微服务,Feign">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot——Netflix Feign">
+<meta property="og:url" content="http://doboot.github.io/2016/09/07/springboot-netflix-feign/index.html">
+<meta property="og:site_name" content="Ivan&#39;s Blog">
+<meta property="og:description" content="1. 概述What？Feign是一个 Netflix 开发的声明性的Web服务客户端，灵感来源于Retrofit、JAXRS-2.0和WebSocket。Feign 最初是为了降低统一绑定Denominator 到 HTTP API 的复杂度，使得 Java HTTP 客户端编写更方便。Feign 的 MAVEN 直接依赖如下所示： 12345678910&amp;lt;dependency&amp;gt;">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-14T06:10:20.935Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringBoot——Netflix Feign">
+<meta name="twitter:description" content="1. 概述What？Feign是一个 Netflix 开发的声明性的Web服务客户端，灵感来源于Retrofit、JAXRS-2.0和WebSocket。Feign 最初是为了降低统一绑定Denominator 到 HTTP API 的复杂度，使得 Java HTTP 客户端编写更方便。Feign 的 MAVEN 直接依赖如下所示： 12345678910&amp;lt;dependency&amp;gt;">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Ivan's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://doboot.github.io/2016/09/07/springboot-netflix-feign/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>SpringBoot——Netflix Feign | Ivan's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ivan's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">虽日暮途远，仍梦想诗和远方</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://doboot.github.io/2016/09/07/springboot-netflix-feign/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ivan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/348097?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ivan's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">SpringBoot——Netflix Feign
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2016-09-07 18:23:00" itemprop="dateCreated datePublished" datetime="2016-09-07T18:23:00+08:00">2016-09-07</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-14 14:10:20" itemprop="dateModified" datetime="2020-11-14T14:10:20+08:00">2020-11-14</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2016/09/07/springboot-netflix-feign/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2016/09/07/springboot-netflix-feign/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">16k</span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><h3 id="What？"><a href="#What？" class="headerlink" title="What？"></a>What？</h3><p>Feign是一个 Netflix 开发的声明性的Web服务客户端，灵感来源于<code>Retrofit</code>、<code>JAXRS-2.0</code>和<code>WebSocket</code>。Feign 最初是为了降低统一绑定Denominator 到 HTTP API 的复杂度，使得 Java HTTP 客户端编写更方便。<br>Feign 的 MAVEN 直接依赖如下所示：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.feign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;feign.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.feign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-gson<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;feign.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>其中 <em>feign-gson</em> 主要是为了进行 gson 序列化，并不是必需的</p>
+</blockquote>
+<a id="more"></a>
+<h3 id="Why-Feign？"><a href="#Why-Feign？" class="headerlink" title="Why Feign？"></a>Why Feign？</h3><p>当然，你可以使用 <code>Jersey</code> 和 <code>CXF</code> 这些来写一个 <code>Rest</code> 或 <code>SOAP</code> 服务的java客服端，也可以直接使用 <code>Apache HttpClient</code> 来实现。但是 <code>Feign</code> 的目的是尽量的减少资源和代码来实现和 <code>HTTP API</code> 的连接。通过自定义的编码解码器以及错误处理，你可以编写任何基于文本的 <code>HTTP API</code>。</p>
+<h3 id="How？"><a href="#How？" class="headerlink" title="How？"></a>How？</h3><p><code>Feign</code> 通过注解注入一个模板化请求进行工作，它本身并不对请求进行处理，只不过通过注解来生成 Request，并进行 URL 的模板进行参数替换。然而这也限制了 <code>Feign</code>，<strong>只支持文本形式的API</strong>，它在响应请求等方面极大的简化了系统。同时，它也是十分容易进行单元测试的。</p>
+<h2 id="2-使用简介"><a href="#2-使用简介" class="headerlink" title="2. 使用简介"></a>2. 使用简介</h2><h3 id="2-1-基本用法"><a href="#2-1-基本用法" class="headerlink" title="2.1 基本用法"></a>2.1 基本用法</h3><p>​    Feign 的使用比较简单，如下是获取 GitHub Contributors 的示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">GitHubClient</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// RequestLine注解声明请求方法和请求地址,可以允许有查询参数</span></span><br><span class="line">    <span class="meta">@RequestLine</span>(<span class="string">"GET /repos/&#123;owner&#125;/&#123;repo&#125;/contributors"</span>)</span><br><span class="line">    <span class="function">List&lt;Contributor&gt; <span class="title">contributors</span><span class="params">(@Param(<span class="string">"owner"</span>)</span> String owner, @<span class="title">Param</span><span class="params">(<span class="string">"repo"</span>)</span> String repo)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Contributor</span> </span>&#123;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">final</span> String login;</span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">int</span> contributions;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">Contributor</span><span class="params">(String login, <span class="keyword">int</span> contributions)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">this</span>.login = login;</span><br><span class="line">            <span class="keyword">this</span>.contributions = contributions;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过 <em>@RequestLine</em> 即可定义一个远程的 Http 请求，通过参数指定请求的方法以及 PATH 属性（支持参数替换），具体值来自于以 <em>@Param</em> 指定的方法参数。</p>
+<p>单元测试用例如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FeignTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testFeign</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        GitHubClient github = Feign.builder()</span><br><span class="line">                .decoder(<span class="keyword">new</span> GsonDecoder())</span><br><span class="line">                .target(GitHubClient.class, "https://api.github.com");</span><br><span class="line"></span><br><span class="line">        <span class="comment">// Fetch and print a list of the contributors to this library.</span></span><br><span class="line">        List&lt;GitHubClient.Contributor&gt; contributors = github.contributors(<span class="string">"OpenFeign"</span>, <span class="string">"feign"</span>);</span><br><span class="line">        <span class="keyword">for</span> (GitHubClient.Contributor contributor : contributors) &#123;</span><br><span class="line">            log.info(contributor.login + <span class="string">" ("</span> + contributor.contributions + <span class="string">")"</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意：这里并没有严格按照单元测试用例的规范来通过 assert 验证，而是将数据打印了出来。</p>
+</blockquote>
+<h3 id="2-2-自定义与定制化"><a href="#2-2-自定义与定制化" class="headerlink" title="2.2 自定义与定制化"></a>2.2 自定义与定制化</h3><p>可以看到在测试用例中，我们通过 <code>Feign.Builder</code>来实例化我们的 <code>GitHubClient</code>，其`Build的过程其实有许多的定制化入口，比如日志、编码、解码、重试机制等等。</p>
+<p>比如，下面的代码演示了如何构建使用自定义的编码：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BankClient</span> </span>&#123;</span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"POST /account/&#123;id&#125;"</span>)</span><br><span class="line">  <span class="function">Account <span class="title">getAccountInfo</span><span class="params">(@Param(<span class="string">"id"</span>)</span> String id)</span>;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line"><span class="comment">// AccountDecoder() 是自己实现的一个Decoder</span></span><br><span class="line">BankClient bankClient = Feign.builder().decoder(new AccountDecoder()).target(BankClient.class, "https://api.examplebank.com");</span><br></pre></td></tr></table></figure>
+<h2 id="3-Feign-的组成"><a href="#3-Feign-的组成" class="headerlink" title="3. Feign 的组成"></a>3. Feign 的组成</h2><h3 id="3-1-编码器-Encoder"><a href="#3-1-编码器-Encoder" class="headerlink" title="3.1 编码器 Encoder"></a>3.1 编码器 <em>Encoder</em></h3><p>发送一个Post请求最简单的方法就是传递一个 <code>String</code> 或者 <code>byte[]</code> 类型的参数了。你也许还需添加一个Content-Type请求头，如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">LoginClient</span> </span>&#123;</span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"POST /"</span>)</span><br><span class="line">  <span class="meta">@Headers</span>(<span class="string">"Content-Type: application/json"</span>)</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">login</span><span class="params">(String content)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">client.login(<span class="string">"&#123;\"user_name\": \"denominator\", \"password\": \"secret\"&#125;"</span>);</span><br></pre></td></tr></table></figure>
+<p>通过配置一个解码器，你可以发送一个安全类型的请求体，如下是一个使用 feign-gson 扩展的例子:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Credentials</span> </span>&#123;</span><br><span class="line">  <span class="keyword">final</span> String user_name;</span><br><span class="line">  <span class="keyword">final</span> String password;</span><br><span class="line"></span><br><span class="line">  Credentials(String user_name, String password) &#123;</span><br><span class="line">    <span class="keyword">this</span>.user_name = user_name;</span><br><span class="line">    <span class="keyword">this</span>.password = password;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">LoginClient</span> </span>&#123;</span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"POST /"</span>)</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">login</span><span class="params">(Credentials creds)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">LoginClient client = Feign.builder()</span><br><span class="line">                          .encoder(<span class="keyword">new</span> GsonEncoder())</span><br><span class="line">                          .target(LoginClient.class, "https://foo.com");</span><br><span class="line"></span><br><span class="line">client.login(<span class="keyword">new</span> Credentials(<span class="string">"denominator"</span>, <span class="string">"secret"</span>));</span><br></pre></td></tr></table></figure>
+<h3 id="3-2-解码器-Decoder"><a href="#3-2-解码器-Decoder" class="headerlink" title="3.2 解码器 Decoder"></a>3.2 解码器 <em>Decoder</em></h3><p>相对应于编码器，假如有接口方法返回的消息不是 <code>Response</code>, <code>String</code>, <code>byte[]</code> 或者 <code>void</code> 类型的，那么你需要配置一个非默认的解码器。<br>下面是一个配置使用JSON解码器(使用的是feign-gson扩展)的例子:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GitHub github = Feign.builder()</span><br><span class="line">                     .decoder(<span class="keyword">new</span> GsonDecoder())</span><br><span class="line">                     .target(GitHub.class, "https://api.github.com");</span><br></pre></td></tr></table></figure>
+<p>假如你想在将响应传递给解码器处理前做一些额外的处理，那么你可以使用<code>mapAndDecode</code>方法。一个用例就是使用jsonp服务的时候:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">JsonpApi jsonpApi = Feign.builder()</span><br><span class="line">            .mapAndDecode((response, type) -&gt; jsopUnwrap(response, type), <span class="keyword">new</span> GsonDecoder())</span><br><span class="line">            .target(JsonpApi.class, "https://some-jsonp-api.com");</span><br></pre></td></tr></table></figure>
+<h3 id="3-3-Body-模板"><a href="#3-3-Body-模板" class="headerlink" title="3.3 @Body 模板"></a>3.3 @Body 模板</h3><p><code>@Body</code>注解申明一个请求体模板，模板中可以带有参数，与方法中 <code>@Param</code> 注解申明的参数相匹配,使用方法如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">LoginClient</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"POST /"</span>)</span><br><span class="line">  <span class="meta">@Headers</span>(<span class="string">"Content-Type: application/xml"</span>)</span><br><span class="line">  <span class="meta">@Body</span>(<span class="string">"&lt;login \"user_name\"=\"&#123;user_name&#125;\" \"password\"=\"&#123;password&#125;\"/&gt;"</span>)</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">xml</span><span class="params">(@Param(<span class="string">"user_name"</span>)</span> String user, @<span class="title">Param</span><span class="params">(<span class="string">"password"</span>)</span> String password)</span>;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"POST /"</span>)</span><br><span class="line">  <span class="meta">@Headers</span>(<span class="string">"Content-Type: application/json"</span>)</span><br><span class="line">  <span class="comment">// json curly braces must be escaped!</span></span><br><span class="line">  <span class="comment">// 这里JSON格式需要的花括号居然需要转码，有点蛋疼了。</span></span><br><span class="line">  <span class="meta">@Body</span>(<span class="string">"%7B\"user_name\": \"&#123;user_name&#125;\", \"password\": \"&#123;password&#125;\"%7D"</span>)</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">json</span><span class="params">(@Param(<span class="string">"user_name"</span>)</span> String user, @<span class="title">Param</span><span class="params">(<span class="string">"password"</span>)</span> String password)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"><span class="comment">// &lt;login "user_name"="denominator" "password"="secret"/&gt;</span></span><br><span class="line">client.xml(<span class="string">"denominator"</span>, <span class="string">"secret"</span>); </span><br><span class="line"></span><br><span class="line"><span class="comment">// &#123;"user_name": "denominator", "password": "secret"&#125;</span></span><br><span class="line">client.json(<span class="string">"denominator"</span>, <span class="string">"secret"</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="3-4-Headers-支持"><a href="#3-4-Headers-支持" class="headerlink" title="3.4 Headers 支持"></a>3.4 Headers 支持</h3><p><code>Feign</code> 支持给请求的api设置或者请求的客户端设置请求头：</p>
+<h4 id="3-4-1-给API设置请求头"><a href="#3-4-1-给API设置请求头" class="headerlink" title="3.4.1 给API设置请求头"></a>3.4.1 给API设置请求头</h4><ol>
+<li><p>使用 <code>@Headers</code> 设置静态请求头</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 给BaseApi中的所有方法设置Accept请求头</span></span><br><span class="line"><span class="meta">@Headers</span>(<span class="string">"Accept: application/json"</span>)</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BaseApi</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line">  <span class="comment">// 单独给put方法设置Content-Type请求头</span></span><br><span class="line">  <span class="meta">@Headers</span>(<span class="string">"Content-Type: application/json"</span>)</span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"PUT /api/&#123;key&#125;"</span>)</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">put</span><span class="params">(@Param(<span class="string">"key"</span>)</span> String, V value)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol start="2">
+<li><p>设置动态值的请求头</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestLine</span>(<span class="string">"POST /"</span>)</span><br><span class="line"><span class="meta">@Headers</span>(<span class="string">"X-Ping: &#123;token&#125;"</span>)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">post</span><span class="params">(@Param(<span class="string">"token"</span>)</span> String token)</span>;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol start="3">
+<li><p>设置key和value都是动态的请求头 </p>
+<p>有些API需要根据调用时动态确定使用不同的请求头（比如：设置 <em>x-amz-meta- 或者 </em>x-goog-meta-*）,<br>这时候可以使用 <code>@HeaderMap</code> 注解，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// @HeaderMap 注解设置的请求头优先于其他方式设置的</span></span><br><span class="line"><span class="meta">@RequestLine</span>(<span class="string">"POST /"</span>)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">post</span><span class="params">(@HeaderMap Map&lt;String, Object&gt; headerMap)</span></span>;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h4 id="3-4-2-给Target设置请求头"><a href="#3-4-2-给Target设置请求头" class="headerlink" title="3.4.2 给Target设置请求头"></a>3.4.2 给Target设置请求头</h4><p>有时我们需要在一个API实现中根据不同的endpoint来传入不同的Header，这个时候我们可以使用自定义的RequestInterceptor 或 Target来实现。<br>下面是一个通过自定义Target来实现给每个Target设置安全校验信息Header的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">DynamicAuthTokenTarget</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">Target</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">DynamicAuthTokenTarget</span><span class="params">(Class&lt;T&gt; clazz,</span></span></span><br><span class="line"><span class="function"><span class="params">                                UrlAndTokenProvider provider,</span></span></span><br><span class="line"><span class="function"><span class="params">                                ThreadLocal&lt;String&gt; requestIdProvider)</span></span>;</span><br><span class="line">  ...</span><br><span class="line">  <span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Request <span class="title">apply</span><span class="params">(RequestTemplate input)</span> </span>&#123;</span><br><span class="line">    TokenIdAndPublicURL urlAndToken = provider.get();</span><br><span class="line">    <span class="keyword">if</span> (input.url().indexOf(<span class="string">"http"</span>) != <span class="number">0</span>) &#123;</span><br><span class="line">      input.insert(<span class="number">0</span>, urlAndToken.publicURL);</span><br><span class="line">    &#125;</span><br><span class="line">    input.header(<span class="string">"X-Auth-Token"</span>, urlAndToken.tokenId);</span><br><span class="line">    input.header(<span class="string">"X-Request-ID"</span>, requestIdProvider.get());</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> input.request();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">Bank bank = Feign.builder()</span><br><span class="line">        .target(<span class="keyword">new</span> DynamicAuthTokenTarget(Bank<span class="class">.<span class="keyword">class</span>, <span class="title">provider</span>, <span class="title">requestIdProvider</span>))</span>;</span><br></pre></td></tr></table></figure>
+<p>这种方法的实现依赖于给<code>Feign</code> 客户端设置的自定义的RequestInterceptor 或 Target。可以被用来给一个客户端的所有api请求设置请求头。比如说可是被用来在header中设置身份校验信息。这些方法是在线程执行api请求的时候才会执行，所以是允许在运行时根据上下文来动态设置header的。<br>比如说可以根据线程本地存储(thread-local storage)来为不同的线程设置不同的请求头。</p>
+<h2 id="4-Feign-与第三方组件的集成"><a href="#4-Feign-与第三方组件的集成" class="headerlink" title="4. Feign 与第三方组件的集成"></a>4. Feign 与第三方组件的集成</h2><h3 id="4-1-Gson"><a href="#4-1-Gson" class="headerlink" title="4.1 Gson"></a>4.1 Gson</h3><p><a href="https://github.com/OpenFeign/feign/blob/master/gson" target="_blank" rel="noopener">Gson</a> 包含了一个编码器和一个解码器，这个可以被用于JSON格式的API。<br>添加 <code>GsonEncoder</code> 以及 <code>GsonDecoder</code> 到你的 <code>Feign.Builder</code> 中， 如下:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">GsonCodec codec = <span class="keyword">new</span> GsonCodec();</span><br><span class="line">GitHub github = Feign.builder()</span><br><span class="line">                     .encoder(<span class="keyword">new</span> GsonEncoder())</span><br><span class="line">                     .decoder(<span class="keyword">new</span> GsonDecoder())</span><br><span class="line">                     .target(GitHub.class, "https://api.github.com");</span><br></pre></td></tr></table></figure>
+<p>需要的 MAVEN 依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/com.netflix.feign/feign-gson --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.feign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-gson<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.18.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="4-2-Jackson"><a href="#4-2-Jackson" class="headerlink" title="4.2 Jackson"></a>4.2 Jackson</h3><p><a href="https://github.com/OpenFeign/feign/blob/master/jackson" target="_blank" rel="noopener">Jackson</a> 包含了一个编码器和一个解码器，这个可以被用于JSON格式的API。<br>添加 <code>JacksonEncoder</code> 以及 <code>JacksonDecoder</code> 到你的 <code>Feign.Builder</code> 中， 如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">GitHub github = Feign.builder()</span><br><span class="line">                     .encoder(<span class="keyword">new</span> JacksonEncoder())</span><br><span class="line">                     .decoder(<span class="keyword">new</span> JacksonDecoder())</span><br><span class="line">                     .target(GitHub.class, "https://api.github.com");</span><br></pre></td></tr></table></figure>
+<p>对应的 MAVEN 依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/com.netflix.feign/feign-gson --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.feign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-jackson<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.18.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="4-3-Sax"><a href="#4-3-Sax" class="headerlink" title="4.3 Sax"></a>4.3 Sax</h3><p><a href="https://github.com/OpenFeign/feign/blob/master/sax" target="_blank" rel="noopener"><code>SaxDecoder</code></a> 用于解析XML,并兼容普通JVM和Android。下面是一个配置sax来解析响应的例子：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">api = Feign.builder()</span><br><span class="line">           .decoder(SAXDecoder.builder()</span><br><span class="line">                              .registerContentHandler(UserIdHandler<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class">                              .<span class="title">build</span>())</span></span><br><span class="line">           .target(Api.class, "https://apihost");</span><br></pre></td></tr></table></figure>
+<p>对应的 MAVEN 依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.feign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-sax<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.18.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="4-4-JAXB"><a href="#4-4-JAXB" class="headerlink" title="4.4 JAXB"></a>4.4 JAXB</h3><p><a href="https://github.com/OpenFeign/feign/blob/master/jaxb" target="_blank" rel="noopener">JAXB</a> 包含了一个编码器和一个解码器，这个可以被用于XML格式的API。<br>添加 <code>JAXBEncoder</code> 以及 <code>JAXBDecoder</code> 到你的 <code>Feign.Builder</code> 中， 如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">api = Feign.builder()</span><br><span class="line">           .encoder(<span class="keyword">new</span> JAXBEncoder())</span><br><span class="line">           .decoder(<span class="keyword">new</span> JAXBDecoder())</span><br><span class="line">           .target(Api.class, "https://apihost");</span><br></pre></td></tr></table></figure>
+<p>对应的 MAVEN 依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/com.netflix.feign/feign-gson --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.feign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-jaxb<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.18.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="4-5-JAX-RS"><a href="#4-5-JAX-RS" class="headerlink" title="4.5 JAX-RS"></a>4.5 JAX-RS</h3><p><a href="https://github.com/OpenFeign/feign/blob/master/jaxrs" target="_blank" rel="noopener"><code>JAXRSContract</code></a> 使用 JAX-RS 规范重写覆盖了默认的注解处理。下面是一个使用 JAX-RS 的例子：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">GitHub</span> </span>&#123;</span><br><span class="line">  <span class="meta">@GET</span> <span class="meta">@Path</span>(<span class="string">"/repos/&#123;owner&#125;/&#123;repo&#125;/contributors"</span>)</span><br><span class="line">  <span class="function">List&lt;Contributor&gt; <span class="title">contributors</span><span class="params">(@PathParam(<span class="string">"owner"</span>)</span> String owner, @<span class="title">PathParam</span><span class="params">(<span class="string">"repo"</span>)</span> String repo)</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// contract 方法配置注解处理器,注解处理器定义了哪些注解和值是可以作用于接口的</span></span><br><span class="line">GitHub github = Feign.builder()</span><br><span class="line">                     .contract(<span class="keyword">new</span> JAXRSContract())</span><br><span class="line">                     .target(GitHub.class, "https://api.github.com");</span><br></pre></td></tr></table></figure>
+<p>对应的 MAVEN 依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/com.netflix.feign/feign-gson --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.feign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-jaxrs<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.18.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="4-6-OkHttp"><a href="#4-6-OkHttp" class="headerlink" title="4.6 OkHttp"></a>4.6 OkHttp</h3><p><a href="https://github.com/OpenFeign/feign/blob/master/okhttp" target="_blank" rel="noopener">OkHttpClient</a> 使用 <code>OkHttp</code> 来发送 <code>Feign</code> 的请求，<code>OkHttp</code> 支持 <code>SPDY</code> (SPDY是Google开发的基于TCP的传输层协议，用以最小化网络延迟，提升网络速度，优化用户的网络使用体验),并有更好的控制http请求。<br>要让 <code>Feign</code> 使用 <code>OkHttp</code> ，你需要将 <code>OkHttp</code> 加入到你的环境变量中区，然后配置 <code>Feign</code> 使用 <code>OkHttpClient</code>，如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GitHub github = Feign.builder()</span><br><span class="line">                     .client(<span class="keyword">new</span> OkHttpClient())</span><br><span class="line">                     .target(GitHub.class, "https://api.github.com");</span><br></pre></td></tr></table></figure>
+<p>对应的 MAVEN 依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/com.netflix.feign/feign-gson --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.feign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-okhttp<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.18.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="4-7-Ribbon"><a href="#4-7-Ribbon" class="headerlink" title="4.7 Ribbon"></a>4.7 Ribbon</h3><p><a href="https://github.com/OpenFeign/feign/blob/master/ribbon" target="_blank" rel="noopener"><code>RibbonClient</code></a> 重写了 <code>Feign</code> 客户端的对URL的处理，其添加了 智能路由以及一些其他由<a href="https://github.com/Netflix/ribbon" target="_blank" rel="noopener">Ribbon</a>提供的弹性功能。<br>集成Ribbon需要你将ribbon的客户端名称当做url的host部分来传递，如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// myAppProd是你的ribbon client name</span></span><br><span class="line">MyService api = Feign.builder().client(RibbonClient.create()).target(MyService.class, "https://myAppProd");</span><br></pre></td></tr></table></figure>
+<p>对应的 MAVEN 依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/com.netflix.feign/feign-gson --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.feign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-ribbon<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.18.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="4-8-Hystrix"><a href="#4-8-Hystrix" class="headerlink" title="4.8 Hystrix"></a>4.8 Hystrix</h3><p><a href="https://github.com/OpenFeign/feign/blob/master/hystrix" target="_blank" rel="noopener"><code>HystrixFeign</code></a> 配置了 <code>Hystrix</code> 提供的<strong>熔断</strong>机制。<br>要在 <code>Feign</code> 中使用 <code>Hystrix</code> ，你需要添加<code>Hystrix</code>模块到你的环境变量，然后使用 <code>HystrixFeign</code> 来构造你的API：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MyService api = HystrixFeign.builder().target(MyService.class, "https://myAppProd");</span><br></pre></td></tr></table></figure>
+<p>对应的 MAVEN 依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/com.netflix.feign/feign-gson --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.feign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-hystrix<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.18.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="4-9-SLF4J"><a href="#4-9-SLF4J" class="headerlink" title="4.9 SLF4J"></a>4.9 SLF4J</h3><p><a href="https://github.com/OpenFeign/feign/blob/master/slf4j" target="_blank" rel="noopener">SLF4JModule</a> 允许你使用 <code>SLF4J</code> 作为 <code>Feign</code> 的日志记录模块，这样你就可以轻松的使用 <code>Logback</code>, <code>Log4J</code> , 等 来记录你的日志.<br>要在 <code>Feign</code> 中使用 <code>SLF4J</code> ，你需要添加<code>SLF4J</code>模块和对应的日志记录实现模块(比如Log4J)到你的环境变量，然后配置 <code>Feign</code>使用<code>Slf4jLogger</code>：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GitHub github = Feign.builder()</span><br><span class="line">                     .logger(<span class="keyword">new</span> Slf4jLogger())</span><br><span class="line">                     .target(GitHub.class, "https://api.github.com");</span><br></pre></td></tr></table></figure>
+<p>对应的 MAVEN 依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- https://mvnrepository.com/artifact/com.netflix.feign/feign-gson --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.feign<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>feign-slf4j<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>8.18.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="5-高级用法"><a href="#5-高级用法" class="headerlink" title="5. 高级用法"></a>5. 高级用法</h2><h3 id="5-1-通用-API"><a href="#5-1-通用-API" class="headerlink" title="5.1 通用 API"></a>5.1 通用 API</h3><p>有些请求中的一些方法是通用的，但是可能会有不同的参数类型或者返回类型，这个时候可以这么用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通用API</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BaseAPI</span> </span>&#123;</span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"GET /health"</span>)</span><br><span class="line">  <span class="function">String <span class="title">health</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"GET /all"</span>)</span><br><span class="line">  <span class="function">List&lt;Entity&gt; <span class="title">all</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 继承通用API</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">CustomAPI</span> <span class="keyword">extends</span> <span class="title">BaseAPI</span> </span>&#123;</span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"GET /custom"</span>)</span><br><span class="line">  <span class="function">String <span class="title">custom</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 各种类型有相同的表现形式，定义一个统一的API</span></span><br><span class="line"><span class="meta">@Headers</span>(<span class="string">"Accept: application/json"</span>)</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BaseApi</span>&lt;<span class="title">V</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"GET /api/&#123;key&#125;"</span>)</span><br><span class="line">  <span class="function">V <span class="title">get</span><span class="params">(@Param(<span class="string">"key"</span>)</span> String key)</span>;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"GET /api"</span>)</span><br><span class="line">  <span class="function">List&lt;V&gt; <span class="title">list</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@Headers</span>(<span class="string">"Content-Type: application/json"</span>)</span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"PUT /api/&#123;key&#125;"</span>)</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">put</span><span class="params">(@Param(<span class="string">"key"</span>)</span> String key, V value)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 根据不同的类型来继承</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">FooApi</span> <span class="keyword">extends</span> <span class="title">BaseApi</span>&lt;<span class="title">Foo</span>&gt; </span>&#123; &#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">BarApi</span> <span class="keyword">extends</span> <span class="title">BaseApi</span>&lt;<span class="title">Bar</span>&gt; </span>&#123; &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="5-2-Logging"><a href="#5-2-Logging" class="headerlink" title="5.2 Logging"></a>5.2 Logging</h3><p>你可以通过设置一个 <code>Logger</code> 来记录http消息，如下:</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">GitHub github = Feign.builder()</span><br><span class="line">                     .decoder(<span class="keyword">new</span> GsonDecoder())</span><br><span class="line">                     .logger(<span class="keyword">new</span> Logger.JavaLogger().appendToFile(<span class="string">"logs/http.log"</span>))</span><br><span class="line">                     .logLevel(Logger.Level.FULL)</span><br><span class="line">                     .target(GitHub.class, "https://api.github.com");</span><br></pre></td></tr></table></figure>
+<p>参考第 4 部分的 <em>SLF4J</em> 集成</p>
+<h3 id="5-2-Request-Interceptors"><a href="#5-2-Request-Interceptors" class="headerlink" title="5.2 Request Interceptors"></a>5.2 Request Interceptors</h3><p>当你希望修改所有的的请求的时候，你可以使用Request Interceptors。比如说，你作为一个中介，你可能需要为每个请求设置 <code>X-Forwarded-For</code>：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ForwardedForInterceptor</span> <span class="keyword">implements</span> <span class="title">RequestInterceptor</span> </span>&#123;</span><br><span class="line">  <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">apply</span><span class="params">(RequestTemplate template)</span> </span>&#123;</span><br><span class="line">    template.header(<span class="string">"X-Forwarded-For"</span>, <span class="string">"origin.host.com"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br><span class="line">Bank bank = Feign.builder()</span><br><span class="line">                 .decoder(accountDecoder)</span><br><span class="line">                 .requestInterceptor(<span class="keyword">new</span> ForwardedForInterceptor())</span><br><span class="line">                 .target(Bank.class, "https://api.examplebank.com");</span><br></pre></td></tr></table></figure>
+<h3 id="5-3-自定义-Param-展开"><a href="#5-3-自定义-Param-展开" class="headerlink" title="5.3 自定义 @Param 展开"></a>5.3 自定义 @Param 展开</h3><p>在使用 <code>@Param</code> 注解给模板中的参数设值的时候，默认的是使用的对象的 <code>toString()</code> 方法的值，通过声明 自定义的<code>Param.Expander</code>，用户可以控制其行为，比如说格式化 <code>Date</code> 类型的值：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过设置 @Param 的 expander 为 DateToMillis.class 可以定义Date类型的值</span></span><br><span class="line"><span class="meta">@RequestLine</span>(<span class="string">"GET /?since=&#123;date&#125;"</span>) </span><br><span class="line"><span class="function">Result <span class="title">list</span><span class="params">(@Param(value = <span class="string">"date"</span>, expander = DateToMillis.class)</span> Date date)</span>;</span><br></pre></td></tr></table></figure>
+<h3 id="5-4-动态查询参数"><a href="#5-4-动态查询参数" class="headerlink" title="5.4 动态查询参数"></a>5.4 动态查询参数</h3><p>动态查询参数支持，通过使用 <code>@QueryMap</code> 可以允许动态传入请求参数,如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RequestLine</span>(<span class="string">"GET /find"</span>)</span><br><span class="line"><span class="function">V <span class="title">find</span><span class="params">(@QueryMap Map&lt;String, Object&gt; queryMap)</span></span>;</span><br></pre></td></tr></table></figure>
+<h3 id="5-5-表态方法与默认方法"><a href="#5-5-表态方法与默认方法" class="headerlink" title="5.5 表态方法与默认方法"></a>5.5 表态方法与默认方法</h3><p>如果你使用的是JDK 1.8+ 的话，那么你可以给接口设置统一的默认方法和静态方法,这个事JDK8的新特性，如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">GitHub</span> </span>&#123;</span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"GET /repos/&#123;owner&#125;/&#123;repo&#125;/contributors"</span>)</span><br><span class="line">  <span class="function">List&lt;Contributor&gt; <span class="title">contributors</span><span class="params">(@Param(<span class="string">"owner"</span>)</span> String owner, @<span class="title">Param</span><span class="params">(<span class="string">"repo"</span>)</span> String repo)</span>;</span><br><span class="line"></span><br><span class="line">  <span class="meta">@RequestLine</span>(<span class="string">"GET /users/&#123;username&#125;/repos?sort=&#123;sort&#125;"</span>)</span><br><span class="line">  <span class="function">List&lt;Repo&gt; <span class="title">repos</span><span class="params">(@Param(<span class="string">"username"</span>)</span> String owner, @<span class="title">Param</span><span class="params">(<span class="string">"sort"</span>)</span> String sort)</span>;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">default</span> List&lt;Repo&gt; <span class="title">repos</span><span class="params">(String owner)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> repos(owner, <span class="string">"full_name"</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Lists all contributors for all repos owned by a user.</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="function"><span class="keyword">default</span> List&lt;Contributor&gt; <span class="title">contributors</span><span class="params">(String user)</span> </span>&#123;</span><br><span class="line">    MergingContributorList contributors = <span class="keyword">new</span> MergingContributorList();</span><br><span class="line">    <span class="keyword">for</span>(Repo repo : <span class="keyword">this</span>.repos(owner)) &#123;</span><br><span class="line">      contributors.addAll(<span class="keyword">this</span>.contributors(user, repo.getName()));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> contributors.mergeResult();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">static</span> GitHub <span class="title">connect</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Feign.builder()</span><br><span class="line">                .decoder(<span class="keyword">new</span> GsonDecoder())</span><br><span class="line">                .target(GitHub.class, "https://api.github.com");</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-wepay.jpg" alt="Ivan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-alipay.jpg" alt="Ivan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/微服务/" rel="tag"># 微服务</a>
+          
+            <a href="/tags/Feign/" rel="tag"># Feign</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/24/zai-spring-boot-zhong-ge-shi-hua-json-ri-qi/" rel="next" title="在Spring Boot中格式化JSON日期">
+                <i class="fa fa-chevron-left"></i> 在Spring Boot中格式化JSON日期
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/10/tomcat-yuan-ma-jie-du-lu-you-you-xi/" rel="prev" title="Tomcat源码解读——Mapper的路由游戏">
+                Tomcat源码解读——Mapper的路由游戏 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/348097?s=460&v=4" alt="Ivan">
+            
+              <p class="site-author-name" itemprop="name">Ivan</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">104</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">99</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/huangfengjing" title="GitHub &rarr; https://github.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:huangfengjing@gmail.com" title="E-Mail &rarr; mailto:huangfengjing@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/huangfengjing" title="Weibo &rarr; https://weibo.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://plus.google.com/huangfengjing" title="Google &rarr; https://plus.google.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/huangfengjing" title="Twitter &rarr; https://twitter.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.facebook.com/huangfengjing" title="FB Page &rarr; https://www.facebook.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-facebook"></i>FB Page</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-概述"><span class="nav-text">1. 概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#What？"><span class="nav-text">What？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Why-Feign？"><span class="nav-text">Why Feign？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#How？"><span class="nav-text">How？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-使用简介"><span class="nav-text">2. 使用简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-基本用法"><span class="nav-text">2.1 基本用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-自定义与定制化"><span class="nav-text">2.2 自定义与定制化</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Feign-的组成"><span class="nav-text">3. Feign 的组成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-编码器-Encoder"><span class="nav-text">3.1 编码器 Encoder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-解码器-Decoder"><span class="nav-text">3.2 解码器 Decoder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Body-模板"><span class="nav-text">3.3 @Body 模板</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-Headers-支持"><span class="nav-text">3.4 Headers 支持</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-1-给API设置请求头"><span class="nav-text">3.4.1 给API设置请求头</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-4-2-给Target设置请求头"><span class="nav-text">3.4.2 给Target设置请求头</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Feign-与第三方组件的集成"><span class="nav-text">4. Feign 与第三方组件的集成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-Gson"><span class="nav-text">4.1 Gson</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-Jackson"><span class="nav-text">4.2 Jackson</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-Sax"><span class="nav-text">4.3 Sax</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-4-JAXB"><span class="nav-text">4.4 JAXB</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-5-JAX-RS"><span class="nav-text">4.5 JAX-RS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-6-OkHttp"><span class="nav-text">4.6 OkHttp</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-7-Ribbon"><span class="nav-text">4.7 Ribbon</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-8-Hystrix"><span class="nav-text">4.8 Hystrix</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-9-SLF4J"><span class="nav-text">4.9 SLF4J</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-高级用法"><span class="nav-text">5. 高级用法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-通用-API"><span class="nav-text">5.1 通用 API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-Logging"><span class="nav-text">5.2 Logging</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-Request-Interceptors"><span class="nav-text">5.2 Request Interceptors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-自定义-Param-展开"><span class="nav-text">5.3 自定义 @Param 展开</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-4-动态查询参数"><span class="nav-text">5.4 动态查询参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-5-表态方法与默认方法"><span class="nav-text">5.5 表态方法与默认方法</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ivan</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'sPghJWhcIktqFoKTHCULrW4R-gzGzoHsz',
+    appKey: 'BlHUFUqfO9HAKGSBaWWNuTUi',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

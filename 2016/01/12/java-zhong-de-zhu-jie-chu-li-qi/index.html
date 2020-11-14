@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css">
+
+<link href="https://fonts.cat.net/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1. 简介本文是Java源代码级别注解处理的简介，并提供了使用此技术在编译期间生成其他源文件的示例。">
+<meta name="keywords" content="Annotation">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java中的注解处理器">
+<meta property="og:url" content="http://doboot.github.io/2016/01/12/java-zhong-de-zhu-jie-chu-li-qi/index.html">
+<meta property="og:site_name" content="Ivan&#39;s Blog">
+<meta property="og:description" content="1. 简介本文是Java源代码级别注解处理的简介，并提供了使用此技术在编译期间生成其他源文件的示例。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-14T06:10:20.925Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java中的注解处理器">
+<meta name="twitter:description" content="1. 简介本文是Java源代码级别注解处理的简介，并提供了使用此技术在编译期间生成其他源文件的示例。">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Ivan's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://doboot.github.io/2016/01/12/java-zhong-de-zhu-jie-chu-li-qi/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Java中的注解处理器 | Ivan's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ivan's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">虽日暮途远，仍梦想诗和远方</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://doboot.github.io/2016/01/12/java-zhong-de-zhu-jie-chu-li-qi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ivan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/348097?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ivan's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java中的注解处理器
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2016-01-12 21:23:00" itemprop="dateCreated datePublished" datetime="2016-01-12T21:23:00+08:00">2016-01-12</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-14 14:10:20" itemprop="dateModified" datetime="2020-11-14T14:10:20+08:00">2020-11-14</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2016/01/12/java-zhong-de-zhu-jie-chu-li-qi/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2016/01/12/java-zhong-de-zhu-jie-chu-li-qi/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">13k</span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h2><p>本文是<strong>Java源代码级别注解处理的简介，</strong>并提供了使用此技术在编译期间生成其他源文件的示例。<br><a id="more"></a></p>
+<h2 id="2-注解处理的应用"><a href="#2-注解处理的应用" class="headerlink" title="2. 注解处理的应用"></a>2. 注解处理的应用</h2><p>源级注解处理首先出现在Java 5中。它是一种在编译阶段生成其他源文件的便捷技术。</p>
+<p>源文件不必是Java文件 - 您可以根据源代码中的注解生成任何类型的描述，元数据，文档，资源或任何其他类型的文件。</p>
+<p>注解处理在许多无处不在的Java库中被广泛使用，例如，在QueryDSL和JPA中生成元类，以使用Lombok库中的样板代码来扩充类。</p>
+<p>需要注意的一件重要事情是<strong>注解处理API的局限性 - 它只能用于生成新文件，而不能用于更改现有文件</strong>。</p>
+<p>值得注意的例外是<a href="https://projectlombok.org/" target="_blank" rel="noopener">Lombok</a>库，它使用注解处理作为引导机制，将自身包含在编译过程中，并通过一些内部编译器API修改AST。这种hacky技术与注解处理的预期目的无关，因此本文不讨论。</p>
+<h2 id="3-注解处理API"><a href="#3-注解处理API" class="headerlink" title="3. 注解处理API"></a>3. 注解处理API</h2><p>注解处理在多轮中完成。每一轮都从编译器搜索源文件中的注解并选择适合这些注解的注解处理器开始。反过来，每个注解处理器在相应的源上被调用。</p>
+<p>如果在此过程中生成了任何文件，则会以生成的文件作为输入启动另一轮。此过程将继续，直到在处理阶段没有生成新文件。</p>
+<p>反过来，每个注解处理器在相应的源上被调用。如果在此过程中生成了任何文件，则会以生成的文件作为输入启动另一轮。此过程将继续，直到在处理阶段没有生成新文件。</p>
+<p>注解处理API位于<em>javax.annotation.processing</em>包中。您必须实现的主要接口是<em>Processor</em>接口，它具有<em>AbstractProcessor</em>类形式的部分实现。这个类是我们要扩展的类，以创建我们自己的注解处理器。</p>
+<h2 id="4-设置项目"><a href="#4-设置项目" class="headerlink" title="4. 设置项目"></a>4. 设置项目</h2><p>为了演示注解处理的可能性，我们将开发一个简单的处理器，用于为带注解的类生成流畅的对象构建器。</p>
+<p>我们将把项目分成两个Maven模块。其中一个<em>注解处理器</em>模块将包含处理器本身和注解，另一个<em>注解用户</em>模块将包含注解类。这是注解处理的典型用例。</p>
+<p><em>annotation-processor</em>模块的设置如下。我们将使用Google的<a href="https://github.com/google/auto/tree/master/service" target="_blank" rel="noopener">auto-service</a>库来生成稍后将讨论的处理器元数据文件，以及针对Java 8源代码调整的<em>maven-compiler-plugin</em>。这些依赖项的版本将提取到属性部分。</p>
+<p>可以在Maven Central存储库中找到最新版本的<a href="https://search.maven.org/classic/#search%7Cgav%7C1%7Cg%3A%22com.google.auto.service%22%20AND%20a%3A%22auto-service%22" target="_blank" rel="noopener">auto-service</a>库和<a href="https://search.maven.org/classic/#search%7Cgav%7C1%7Cg%3A%22org.apache.maven.plugins%22%20AND%20a%3A%22maven-compiler-plugin%22" target="_blank" rel="noopener">maven-compiler-plugin</a>：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">auto-service.version</span>&gt;</span>1.0-rc2<span class="tag">&lt;/<span class="name">auto-service.version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">maven-compiler-plugin.version</span>&gt;</span></span><br><span class="line">      3.5.1</span><br><span class="line">    <span class="tag">&lt;/<span class="name">maven-compiler-plugin.version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line"> </span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.google.auto.service<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>auto-service<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;auto-service.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line"> </span><br><span class="line">        <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;maven-compiler-plugin.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line"> </span><br><span class="line">    <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>带有注解源的<em>注解用户</em> 模型不需要任何特殊调整，除了在依赖项部分中添加对注解处理器模块的依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.doleje<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>annotation-processing<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="5-定义注解"><a href="#5-定义注解" class="headerlink" title="5. 定义注解"></a>5. 定义注解</h2><p>假设我们的<em>注解用户</em>模块中有一个简单的POJO类，它包含几个字段：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// getters and setters …</span></span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们想要创建一个构建器帮助程序类，以更流畅地实例化<em>Person</em>类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Person person = new PersonBuilder()</span><br><span class="line">  .setAge(25)</span><br><span class="line">  .setName(&quot;John&quot;)</span><br><span class="line">  .build();</span><br></pre></td></tr></table></figure>
+<p>这个<em>PersonBuilder</em>类 Person对象的构建器，因为它的结构完全由<em>Person</em> setter方法定义。</p>
+<p>让我们在<em>注解处理器</em>模块中为setter方法创建一个<em>@BuilderProperty</em>注解。它将允许我们为每个具有其setter方法注解的类生成<em>Builder</em>类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target</span>(ElementType.METHOD)</span><br><span class="line"><span class="meta">@Retention</span>(RetentionPolicy.SOURCE)</span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> BuilderProperty &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>带有<em>ElementType.METHOD</em>参数的<em>@Target</em>注解确保此注解只能放在方法上。</p>
+<p>在<em>SOURCE</em>保留策略意味着该注解只能用于源文件处理期间，而不是在运行时可用。</p>
+<p>具有使用<em>@BuilderProperty</em>注解注解的属性的<em>Person</em>类将如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@BuilderProperty</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@BuilderProperty</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// getters …</span></span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="6-实现-Processor"><a href="#6-实现-Processor" class="headerlink" title="6. 实现 Processor"></a>6. 实现 Processor</h2><h3 id="6-1-创建AbstractProcessor子类"><a href="#6-1-创建AbstractProcessor子类" class="headerlink" title="6.1 创建AbstractProcessor子类"></a>6.1 创建AbstractProcessor子类</h3><p>我们将首先在<em>注解处理器</em> Maven模块中扩展<em>AbstractProcessor</em>类。</p>
+<p>首先，我们应该指定该处理器能够处理的注解，以及支持的源代码版本。这可以通过实施方法进行<em>getSupportedAnnotationTypes</em>和<em>getSupportedSourceVersion</em>的的<em>处理器</em>接口或通过注解你的类<em>@SupportedAnnotationTypes</em>和<em>@SupportedSourceVersion</em>注解。</p>
+<p>所述<em>@AutoService</em>注解是的一部分<em>auto-service</em>库，并允许生成，这将在下面的章节进行说明处理器的元数据。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SupportedAnnotationTypes</span>(</span><br><span class="line">  <span class="string">"com.doleje.annotation.processor.BuilderProperty"</span>)</span><br><span class="line"><span class="meta">@SupportedSourceVersion</span>(SourceVersion.RELEASE_8)</span><br><span class="line"><span class="meta">@AutoService</span>(Processor<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class"><span class="title">public</span> <span class="title">class</span> <span class="title">BuilderProcessor</span> <span class="keyword">extends</span> <span class="title">AbstractProcessor</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">process</span><span class="params">(Set&lt;? extends TypeElement&gt; annotations, </span></span></span><br><span class="line"><span class="function"><span class="params">      RoundEnvironment roundEnv)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>您不仅可以指定具体的注解类名称，还可以指定通配符，例如<em>“com.doleje.annotation。\</em>”<em>来处理</em>com.doleje.annotation<em>包及其所有子包内的注解，甚至</em>“*”*来处理所有注解。</p>
+<p>我们必须实现的单一方法是进行<em>process</em>方法。编译器会为包含匹配注解的每个源文件调用它。</p>
+<p>注解作为第一个<em>Set &lt;? extends TypeElement&gt; annotations</em>参数，并将有关当前处理轮次的信息作为<em>RoundEnviroment roundEnv</em>参数传递。</p>
+<p>如果注解处理器已处理了所有传递的注解，并且您不希望它们传递到列表中的其他注解处理器，则返回 <em>true</em>。</p>
+<h3 id="6-2-收集数据"><a href="#6-2-收集数据" class="headerlink" title="6.2 收集数据"></a>6.2 收集数据</h3><p>我们的处理器还没有真正做任何有用的事情，所以让我们用代码完成它。</p>
+<p>首先，我们需要遍历在类中找到的所有注解类型。 在我们的示例中，<em>annotation</em> 集将具有与<em>@BuilderProperty</em>注解相对应的单个元素，即使此注解在源文件中多次出现也是如此。</p>
+<p>尽管如此，为了完整起见，最好将 <em>process</em> 方法实现为迭代循环：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">process</span><span class="params">(Set&lt;? extends TypeElement&gt; annotations, </span></span></span><br><span class="line"><span class="function"><span class="params">  RoundEnvironment roundEnv)</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">for</span> (TypeElement annotation : annotations) &#123;</span><br><span class="line">        Set&lt;? extends Element&gt; annotatedElements </span><br><span class="line">          = roundEnv.getElementsAnnotatedWith(annotation);</span><br><span class="line">         </span><br><span class="line">        <span class="comment">// …</span></span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在此代码中，我们使用<em>RoundEnvironment</em>实例接收使用<em>@BuilderProperty</em>批注注解的所有元素。对于<em>Person</em>类，这些元素对应于<em>setName</em>和<em>setAge</em>方法。</p>
+<p><em>@BuilderProperty</em>注解的用户可能会错误地注解实际上不是setter的方法。setter方法名称应以<em>set</em>开头，方法应该接收一个参数。</p>
+<p>在下面的代码中，我们使用<em>Collectors.partitioningBy()</em>收集器将带注解的方法拆分为两个集合：正确注解的 setter 和其他错误注解的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Boolean, List&lt;Element&gt;&gt; annotatedMethods = annotatedElements.stream().collect(</span><br><span class="line">  Collectors.partitioningBy(element -&gt;</span><br><span class="line">    ((ExecutableType) element.asType()).getParameterTypes().size() == <span class="number">1</span></span><br><span class="line">    &amp;&amp; element.getSimpleName().toString().startsWith(<span class="string">"set"</span>)));</span><br><span class="line"> </span><br><span class="line">List&lt;Element&gt; setters = annotatedMethods.get(<span class="keyword">true</span>);</span><br><span class="line">List&lt;Element&gt; otherMethods = annotatedMethods.get(<span class="keyword">false</span>);</span><br></pre></td></tr></table></figure>
+<p>在这里，我们使用<em>Element.asType()</em>方法接收<em>TypeMirror</em>类的实例，这使我们能够探测类型，即使我们只处于源处理阶段。</p>
+<p>另外，我们应该警告用户注解错误的方法，所以让我们使用可从<em>AbstractProcessor.processingEnv</em> protected字段访问的<em>Messager</em>实例。以下行将在源处理阶段为每个错误注解的元素输出错误：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">otherMethods.forEach(element -&gt;</span><br><span class="line">  processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,</span><br><span class="line">    <span class="string">"@BuilderProperty must be applied to a setXxx method "</span></span><br><span class="line">      + <span class="string">"with a single argument"</span>, element));</span><br></pre></td></tr></table></figure>
+<p>当然，如果正确的setter集合为空，则没有必要继续当前的类型元素集迭代：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (setters.isEmpty()) &#123;</span><br><span class="line">    <span class="keyword">continue</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果setter集合至少有一个元素，我们将使用它从封闭元素中获取完全限定的类名：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String className = ((TypeElement) setters.get(<span class="number">0</span>)</span><br><span class="line">  .getEnclosingElement()).getQualifiedName().toString();</span><br></pre></td></tr></table></figure>
+<p>生成构建器类所需的最后一点信息是setter名称和参数类型名称之间的映射：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, String&gt; setterMap = setters.stream().collect(Collectors.toMap(</span><br><span class="line">    setter -&gt; setter.getSimpleName().toString(),</span><br><span class="line">    setter -&gt; ((ExecutableType) setter.asType())</span><br><span class="line">      .getParameterTypes().get(0).toString()</span><br><span class="line">));</span><br></pre></td></tr></table></figure>
+<h3 id="6-3-生成输出文件"><a href="#6-3-生成输出文件" class="headerlink" title="6.3 生成输出文件"></a>6.3 生成输出文件</h3><p>现在我们拥有生成构建器类所需的所有信息：源类的名称，所有setter名称及其参数类型。</p>
+<p>要生成输出文件，我们将使用<em>AbstractProcessor.processingEnv</em> protected属性中的对象再次提供的<em>Filer</em>实例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">JavaFileObject builderFile = processingEnv.getFiler()</span><br><span class="line">  .createSourceFile(builderClassName);</span><br><span class="line"><span class="keyword">try</span> (PrintWriter out = <span class="keyword">new</span> PrintWriter(builderFile.openWriter())) &#123;</span><br><span class="line">    <span class="comment">// writing generated file to out …</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面提供了<em>writeBuilderFile</em>方法的完整代码。我们只需要为源类和构建器类计算包名，完全限定的构建器类名和简单类名。其余的代码非常简单。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">writeBuilderFile</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">  String className, Map&lt;String, String&gt; setterMap)</span> </span></span><br><span class="line"><span class="function">  <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line"> </span><br><span class="line">    String packageName = <span class="keyword">null</span>;</span><br><span class="line">    <span class="keyword">int</span> lastDot = className.lastIndexOf(<span class="string">'.'</span>);</span><br><span class="line">    <span class="keyword">if</span> (lastDot &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        packageName = className.substring(<span class="number">0</span>, lastDot);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    String simpleClassName = className.substring(lastDot + <span class="number">1</span>);</span><br><span class="line">    String builderClassName = className + <span class="string">"Builder"</span>;</span><br><span class="line">    String builderSimpleClassName = builderClassName</span><br><span class="line">      .substring(lastDot + <span class="number">1</span>);</span><br><span class="line"> </span><br><span class="line">    JavaFileObject builderFile = processingEnv.getFiler()</span><br><span class="line">      .createSourceFile(builderClassName);</span><br><span class="line">     </span><br><span class="line">    <span class="keyword">try</span> (PrintWriter out = <span class="keyword">new</span> PrintWriter(builderFile.openWriter())) &#123;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> (packageName != <span class="keyword">null</span>) &#123;</span><br><span class="line">            out.print(<span class="string">"package "</span>);</span><br><span class="line">            out.print(packageName);</span><br><span class="line">            out.println(<span class="string">";"</span>);</span><br><span class="line">            out.println();</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        out.print(<span class="string">"public class "</span>);</span><br><span class="line">        out.print(builderSimpleClassName);</span><br><span class="line">        out.println(<span class="string">" &#123;"</span>);</span><br><span class="line">        out.println();</span><br><span class="line"> </span><br><span class="line">        out.print(<span class="string">"    private "</span>);</span><br><span class="line">        out.print(simpleClassName);</span><br><span class="line">        out.print(<span class="string">" object = new "</span>);</span><br><span class="line">        out.print(simpleClassName);</span><br><span class="line">        out.println(<span class="string">"();"</span>);</span><br><span class="line">        out.println();</span><br><span class="line"> </span><br><span class="line">        out.print(<span class="string">"    public "</span>);</span><br><span class="line">        out.print(simpleClassName);</span><br><span class="line">        out.println(<span class="string">" build() &#123;"</span>);</span><br><span class="line">        out.println(<span class="string">"        return object;"</span>);</span><br><span class="line">        out.println(<span class="string">"    &#125;"</span>);</span><br><span class="line">        out.println();</span><br><span class="line"> </span><br><span class="line">        setterMap.entrySet().forEach(setter -&gt; &#123;</span><br><span class="line">            String methodName = setter.getKey();</span><br><span class="line">            String argumentType = setter.getValue();</span><br><span class="line"> </span><br><span class="line">            out.print(<span class="string">"    public "</span>);</span><br><span class="line">            out.print(builderSimpleClassName);</span><br><span class="line">            out.print(<span class="string">" "</span>);</span><br><span class="line">            out.print(methodName);</span><br><span class="line"> </span><br><span class="line">            out.print(<span class="string">"("</span>);</span><br><span class="line"> </span><br><span class="line">            out.print(argumentType);</span><br><span class="line">            out.println(<span class="string">" value) &#123;"</span>);</span><br><span class="line">            out.print(<span class="string">"        object."</span>);</span><br><span class="line">            out.print(methodName);</span><br><span class="line">            out.println(<span class="string">"(value);"</span>);</span><br><span class="line">            out.println(<span class="string">"        return this;"</span>);</span><br><span class="line">            out.println(<span class="string">"    &#125;"</span>);</span><br><span class="line">            out.println();</span><br><span class="line">        &#125;);</span><br><span class="line"> </span><br><span class="line">        out.println(<span class="string">"&#125;"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="7-运行示例"><a href="#7-运行示例" class="headerlink" title="7. 运行示例"></a>7. 运行示例</h2><p>要查看代码生成的实际操作，您应该从公共父根编译两个模块，或者首先编译<em>annotation-processor</em>模块，然后编译<em>annotation-user</em>模块。</p>
+<p>生成的<em>PersonBuilder</em>类可以在<em>annotation-user / target / generated-sources / annotations / com / doleje / annotation / PersonBuilder.java</em>文件中找到，应该如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.doleje.annotation;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PersonBuilder</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> Person object = <span class="keyword">new</span> Person();</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> Person <span class="title">build</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> object;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> PersonBuilder <span class="title">setName</span><span class="params">(java.lang.String value)</span> </span>&#123;</span><br><span class="line">        object.setName(value);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> PersonBuilder <span class="title">setAge</span><span class="params">(<span class="keyword">int</span> value)</span> </span>&#123;</span><br><span class="line">        object.setAge(value);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="8-注册处理器的其他方法"><a href="#8-注册处理器的其他方法" class="headerlink" title="8. 注册处理器的其他方法"></a>8. 注册处理器的其他方法</h2><p>要在编译阶段使用注解处理器，您还有其他几个选项，具体取决于您的使用案例和您使用的工具。</p>
+<h3 id="8-1-使用注解处理器工具"><a href="#8-1-使用注解处理器工具" class="headerlink" title="8.1 使用注解处理器工具"></a>8.1 使用注解处理器工具</h3><p>该<em>apt</em>工具是用于处理源文件一个特殊的命令行实用程序。它是Java 5的一部分，但是从Java 7开始，它被弃用以支持其他选项并在Java 8中完全删除。本文不讨论它。</p>
+<h3 id="8-2-使用编译器密钥"><a href="#8-2-使用编译器密钥" class="headerlink" title="8.2 使用编译器密钥"></a>8.2 使用编译器密钥</h3><p>该<em>-processor</em>编译器关键是一个标准的JDK设施，以增加编译器的源处理阶段，自己的注解处理器。</p>
+<p>请注意，处理器本身和注解必须已在单独的编译中编译为类，并出现在类路径中，因此您应该做的第一件事是：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">javac com/doleje/annotation/processor/BuilderProcessor</span><br><span class="line">javac com/doleje/annotation/processor/BuilderProperty</span><br></pre></td></tr></table></figure>
+<p>然后使用<em>-processor</em>键指定您刚刚编译的注解处理器类，对源进行实际编译：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac -processor com.doleje.annotation.processor.MyProcessor Person.java</span><br></pre></td></tr></table></figure>
+<p>要一次指定多个注解处理器，可以用逗号分隔它们的类名，如下所示：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">javac -processor package1.Processor1,package2.Processor2 SourceFile.java</span><br></pre></td></tr></table></figure>
+<h3 id="8-3-使用Maven"><a href="#8-3-使用Maven" class="headerlink" title="8.3 使用Maven"></a>8.3 使用Maven</h3><p>的<em>maven-compiler-plugin</em>允许指定注解处理器作为其配置的一部分。</p>
+<p>这是为编译器插件添加注解处理器的示例。您还可以使用<em>generatedSourcesDirectory</em>配置参数指定要将生成的源放入的目录。</p>
+<p>请注意，<em>BuilderProcessor</em>类应该已经编译，例如，从构建依赖项中的另一个jar导入：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&lt;build&gt;</span><br><span class="line">    &lt;plugins&gt;</span><br><span class="line"> </span><br><span class="line">        &lt;plugin&gt;</span><br><span class="line">            &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;</span><br><span class="line">            &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;</span><br><span class="line">            &lt;version&gt;3.5.1&lt;/version&gt;</span><br><span class="line">            &lt;configuration&gt;</span><br><span class="line">                &lt;source&gt;1.8&lt;/source&gt;</span><br><span class="line">                &lt;target&gt;1.8&lt;/target&gt;</span><br><span class="line">                &lt;encoding&gt;UTF-8&lt;/encoding&gt;</span><br><span class="line">                &lt;generatedSourcesDirectory&gt;$&#123;project.build.directory&#125;</span><br><span class="line">                  /generated-sources/&lt;/generatedSourcesDirectory&gt;</span><br><span class="line">                &lt;annotationProcessors&gt;</span><br><span class="line">                    &lt;annotationProcessor&gt;</span><br><span class="line">                        com.doleje.annotation.processor.BuilderProcessor</span><br><span class="line">                    &lt;/annotationProcessor&gt;</span><br><span class="line">                &lt;/annotationProcessors&gt;</span><br><span class="line">            &lt;/configuration&gt;</span><br><span class="line">        &lt;/plugin&gt;</span><br><span class="line"> </span><br><span class="line">    &lt;/plugins&gt;</span><br><span class="line">&lt;/build&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="8-4-将处理器Jar添加到Classpath"><a href="#8-4-将处理器Jar添加到Classpath" class="headerlink" title="8.4 将处理器Jar添加到Classpath"></a>8.4 将处理器Jar添加到Classpath</h3><p>您可以简单地将具有处理器类的特殊结构化jar添加到编译器的类路径中，而不是在编译器选项中指定注解处理器。</p>
+<p>要自动获取它，编译器必须知道处理器类的名称。因此，您必须在<em>META-INF / services / javax.annotation.processing.Processor</em>文件中将其指定为处理器的完全限定类名：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">com.doleje.annotation.processor.BuilderProcessor</span><br></pre></td></tr></table></figure>
+<p>您还可以指定此jar中的多个处理器，通过用新行分隔它们来自动拾取：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">package1.Processor1``package2.Processor2``package3.Processor3</span><br></pre></td></tr></table></figure>
+<p>如果您使用Maven构建此jar并尝试将此文件直接放入<em>src/main/resources/META-INF/services</em>目录中，您将遇到以下错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[ERROR] Bad service configuration file, or exception thrown while</span><br><span class="line">constructing Processor object: javax.annotation.processing.Processor: </span><br><span class="line">Provider com.doleje.annotation.processor.BuilderProcessor not found</span><br></pre></td></tr></table></figure>
+<p>这是因为当尚未编译<em>BuilderProcessor</em>文件时，编译器尝试在模块本身的<em>source-processing</em>阶段使用此文件。该文件必须放在另一个资源目录中，并在Maven构建的资源复制阶段复制到<em>META-INF / services</em>目录，或者在构建期间生成（甚至更好）。</p>
+<p>以下部分中讨论的Google <em>auto-service</em>库允许使用简单的注解生成此文件。</p>
+<h3 id="8-5-使用Google-auto-service库"><a href="#8-5-使用Google-auto-service库" class="headerlink" title="8.5 使用Google auto-service库"></a>8.5 使用Google auto-service库</h3><p>要自动生成注册文件，您可以使用Google <em>auto-service</em>库中的<em>@AutoService</em>注解，如下所示：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@AutoService(Processor.class)</span><br><span class="line">public BuilderProcessor extends AbstractProcessor &#123;</span><br><span class="line">    // …</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>该注解本身由注解处理器从auto-service库处理。此处理器生成包含<em>BuilderProcessor</em>类名的<em>META-INF / services / javax.annotation.processing.Processor</em>文件。</p>
+<h2 id="9-结论"><a href="#9-结论" class="headerlink" title="9. 结论"></a>9. 结论</h2><p>在本文中，我们使用为POJO生成Builder类的示例演示了源级注释处理。我们还提供了几种在项目中注册注释处理器的替代方法。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-wepay.jpg" alt="Ivan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-alipay.jpg" alt="Ivan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Annotation/" rel="tag"># Annotation</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/01/11/spring-zhu-ru-zhi-resource-autowired-yi-ji-inject-de-qu-bie/" rel="next" title="Spring注入之@Resource、@Autowired以及@Inject的区别">
+                <i class="fa fa-chevron-left"></i> Spring注入之@Resource、@Autowired以及@Inject的区别
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/01/23/jpa-hibernate-ji-springdatajpa-de-shen-ji/" rel="prev" title="JPA,Hibernate及SpringDataJPA 的审计">
+                JPA,Hibernate及SpringDataJPA 的审计 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/348097?s=460&v=4" alt="Ivan">
+            
+              <p class="site-author-name" itemprop="name">Ivan</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">104</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">99</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/huangfengjing" title="GitHub &rarr; https://github.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:huangfengjing@gmail.com" title="E-Mail &rarr; mailto:huangfengjing@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/huangfengjing" title="Weibo &rarr; https://weibo.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://plus.google.com/huangfengjing" title="Google &rarr; https://plus.google.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/huangfengjing" title="Twitter &rarr; https://twitter.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.facebook.com/huangfengjing" title="FB Page &rarr; https://www.facebook.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-facebook"></i>FB Page</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-简介"><span class="nav-text">1. 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-注解处理的应用"><span class="nav-text">2. 注解处理的应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-注解处理API"><span class="nav-text">3. 注解处理API</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-设置项目"><span class="nav-text">4. 设置项目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-定义注解"><span class="nav-text">5. 定义注解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-实现-Processor"><span class="nav-text">6. 实现 Processor</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#6-1-创建AbstractProcessor子类"><span class="nav-text">6.1 创建AbstractProcessor子类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-2-收集数据"><span class="nav-text">6.2 收集数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-3-生成输出文件"><span class="nav-text">6.3 生成输出文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-运行示例"><span class="nav-text">7. 运行示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-注册处理器的其他方法"><span class="nav-text">8. 注册处理器的其他方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#8-1-使用注解处理器工具"><span class="nav-text">8.1 使用注解处理器工具</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-2-使用编译器密钥"><span class="nav-text">8.2 使用编译器密钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-3-使用Maven"><span class="nav-text">8.3 使用Maven</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-4-将处理器Jar添加到Classpath"><span class="nav-text">8.4 将处理器Jar添加到Classpath</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-5-使用Google-auto-service库"><span class="nav-text">8.5 使用Google auto-service库</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-结论"><span class="nav-text">9. 结论</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ivan</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'sPghJWhcIktqFoKTHCULrW4R-gzGzoHsz',
+    appKey: 'BlHUFUqfO9HAKGSBaWWNuTUi',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css">
+
+<link href="https://fonts.cat.net/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="简介 The Apache Tomcat® software is an open source implementation of the Java Servlet, JavaServer Pages, Java Expression Language and Java WebSocket technologies. The Java Servlet, JavaServer Pages, Jav">
+<meta name="keywords" content="源码阅读,Tomcat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat 源码解读——启动篇">
+<meta property="og:url" content="http://doboot.github.io/2016/11/10/tomcat-yuan-ma-jie-du-qi-dong-pian/index.html">
+<meta property="og:site_name" content="Ivan&#39;s Blog">
+<meta property="og:description" content="简介 The Apache Tomcat® software is an open source implementation of the Java Servlet, JavaServer Pages, Java Expression Language and Java WebSocket technologies. The Java Servlet, JavaServer Pages, Jav">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-14T06:10:20.946Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Tomcat 源码解读——启动篇">
+<meta name="twitter:description" content="简介 The Apache Tomcat® software is an open source implementation of the Java Servlet, JavaServer Pages, Java Expression Language and Java WebSocket technologies. The Java Servlet, JavaServer Pages, Jav">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Ivan's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://doboot.github.io/2016/11/10/tomcat-yuan-ma-jie-du-qi-dong-pian/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Tomcat 源码解读——启动篇 | Ivan's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ivan's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">虽日暮途远，仍梦想诗和远方</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://doboot.github.io/2016/11/10/tomcat-yuan-ma-jie-du-qi-dong-pian/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ivan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/348097?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ivan's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Tomcat 源码解读——启动篇
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2016-11-10 09:51:00" itemprop="dateCreated datePublished" datetime="2016-11-10T09:51:00+08:00">2016-11-10</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-14 14:10:20" itemprop="dateModified" datetime="2020-11-14T14:10:20+08:00">2020-11-14</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2016/11/10/tomcat-yuan-ma-jie-du-qi-dong-pian/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2016/11/10/tomcat-yuan-ma-jie-du-qi-dong-pian/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">20k</span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><blockquote>
+<p>The Apache Tomcat® software is an open source implementation of the Java Servlet, JavaServer Pages, Java Expression Language and Java WebSocket technologies. The Java Servlet, JavaServer Pages, Java Expression Language and Java WebSocket specifications are developed under the Java Community Process.<br>The Apache Tomcat software is developed in an open and participatory environment and released under the Apache License version 2. The Apache Tomcat project is intended to be a collaboration of the best-of-breed developers from around the world. We invite you to participate in this open development project. To learn more about getting involved, click here.<br>Apache Tomcat software powers numerous large-scale, mission-critical web applications across a diverse range of industries and organizations. Some of these users and their stories are listed on the PoweredBy wiki page.<br>Apache Tomcat, Tomcat, Apache, the Apache feather, and the Apache Tomcat project logo are trademarks of the Apache Software Foundation.</p>
+<p>以上的简介自来 Apache Tomcat 官网，Tomcat服务器是一个免费的开放源代码的Web应用服务器。Tomcat是Apache软件基金会（Apache Software Foundation）的Jakarta项目中的一个核心项目，由Apache、Sun和其他一些公司及个人共同开发而成。由于有了Sun的参与和支持，最新的Servlet 和JSP规范总是能在Tomcat中得到体现，因为Tomcat技术先进、性能稳定，而且免费，因而深受Java爱好者的喜爱并得到了部分软件开发商的认可，是目前比较流行的Web应用服务器。</p>
+</blockquote>
+<a id="more"></a>
+<p>​    本文基于<strong>Tomcat9</strong>的源码进行解读，不同的版本实现之间可能会有一些差异，请注意区分。</p>
+<h3 id="启动脚本-startup-sh"><a href="#启动脚本-startup-sh" class="headerlink" title="启动脚本 startup.sh"></a>启动脚本 <code>startup.sh</code></h3><p>​    Tomcat 支持不同的平台，其启动方式都大同小异，都提供了相应的启动脚本，windows 平台下是 <code>startup.bat</code>，而在 linux 环境下则是 <code>startup.sh</code>，接下来的介绍都将以 linux 平台为主进行介绍。如下是 linux 平台下的 <code>startup.sh</code> 节选：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">PRGDIR=`dirname "$PRG"`</span><br><span class="line">EXECUTABLE=catalina.sh</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span> Check that target executable exists</span><br><span class="line">if $os400; then</span><br><span class="line"><span class="meta">  #</span> -x will Only work on the os400 if the files are:</span><br><span class="line"><span class="meta">  #</span> 1. owned by the user</span><br><span class="line"><span class="meta">  #</span> 2. owned by the PRIMARY group of the user</span><br><span class="line"><span class="meta">  #</span> this will not work if the user belongs in secondary groups</span><br><span class="line">  eval</span><br><span class="line">else</span><br><span class="line">  if [ ! -x "$PRGDIR"/"$EXECUTABLE" ]; then</span><br><span class="line">    echo "Cannot find $PRGDIR/$EXECUTABLE"</span><br><span class="line">    echo "The file is absent or does not have execute permission"</span><br><span class="line">    echo "This file is needed to run this program"</span><br><span class="line">    exit 1</span><br><span class="line">  fi</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">exec "$PRGDIR"/"$EXECUTABLE" start "$@"</span><br></pre></td></tr></table></figure>
+<p>​    显然，<code>startup.sh</code>只是去调用了<code>catalina.sh</code>而已，所以我们再来看看<code>catalina.sh</code>的内容（为什么叫 catalina，我特意去查了一下词典和相关的资料，我们知道一个著名的 web 服务器就叫 apache，apache 有一个中文名称是：<strong>武装直升机</strong>，牛吧。但是，请再看看 catalina 的另外一个中文名称：<strong>远程轰炸机</strong>，哈哈，是不是更牛！当然，也许 tomcat 的作者并不是取此意，但具体的原因网上已经查不到了。）:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">set _EXECJAVA=%_RUNJAVA%</span><br><span class="line">set MAINCLASS=org.apache.catalina.startup.Bootstrap</span><br><span class="line">set ACTION=start</span><br><span class="line">set SECURITY_POLICY_FILE=</span><br><span class="line">set DEBUG_OPTS=</span><br><span class="line">set JPDA=</span><br></pre></td></tr></table></figure>
+<p>​    Tomcat 是一个由 java 语言编写的开源服务器，从脚本中我们可以看主，其启动类是 Bootstrap ，而且指定了调用的方法为<code>start()</code>，因此我们就从这个类开始深入，一步步来看看整个启动的过程。</p>
+<p>​    <code>Catalina.sh</code>的脚本超过 <strong><em>600</em></strong> 行，包括了平时我们在使用Tomcat时的各种命令实现（比如<strong>start</strong>, <strong>stop</strong>, <strong>run</strong> 等），其启动的主要流程如下（同时对于 CYGWIN 进行了支持）：</p>
+<ul>
+<li><p>设置各类环境变量</p>
+</li>
+<li><p>设置<code>classpath</code></p>
+</li>
+<li><p>解析各个配置属性</p>
+</li>
+<li><p>设置安全管理器</p>
+</li>
+<li><p>调用<code>org.apache.catalina.startup.Bootstrap.start</code>开始整个启动过程</p>
+<p>启动时的主要脚本如下：</p>
+</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">touch "$CATALINA_OUT"</span><br><span class="line">if [ "$1" = "-security" ] ; then</span><br><span class="line">if [ $have_tty -eq 1 ]; then</span><br><span class="line">  echo "Using Security Manager"</span><br><span class="line">fi</span><br><span class="line">shift</span><br><span class="line">eval $_NOHUP "\"$_RUNJAVA\"" "\"$LOGGING_CONFIG\"" $LOGGING_MANAGER $JAVA_OPTS $CATALINA_OPTS \</span><br><span class="line"><span class="meta">  -D$</span>ENDORSED_PROP="\"$JAVA_ENDORSED_DIRS\"" \</span><br><span class="line">  -classpath "\"$CLASSPATH\"" \</span><br><span class="line">  -Djava.security.manager \</span><br><span class="line">  -Djava.security.policy=="\"$CATALINA_BASE/conf/catalina.policy\"" \</span><br><span class="line">  -Dcatalina.base="\"$CATALINA_BASE\"" \</span><br><span class="line">  -Dcatalina.home="\"$CATALINA_HOME\"" \</span><br><span class="line">  -Djava.io.tmpdir="\"$CATALINA_TMPDIR\"" \</span><br><span class="line">  org.apache.catalina.startup.Bootstrap "$@" start \</span><br><span class="line"><span class="meta">  &gt;</span>&gt; "$CATALINA_OUT" 2&gt;&amp;1 "&amp;"</span><br><span class="line"></span><br><span class="line">else</span><br><span class="line">eval $_NOHUP "\"$_RUNJAVA\"" "\"$LOGGING_CONFIG\"" $LOGGING_MANAGER $JAVA_OPTS $CATALINA_OPTS \</span><br><span class="line"><span class="meta">  -D$</span>ENDORSED_PROP="\"$JAVA_ENDORSED_DIRS\"" \</span><br><span class="line">  -classpath "\"$CLASSPATH\"" \</span><br><span class="line">  -Dcatalina.base="\"$CATALINA_BASE\"" \</span><br><span class="line">  -Dcatalina.home="\"$CATALINA_HOME\"" \</span><br><span class="line">  -Djava.io.tmpdir="\"$CATALINA_TMPDIR\"" \</span><br><span class="line">  org.apache.catalina.startup.Bootstrap "$@" start \</span><br><span class="line"><span class="meta">  &gt;</span>&gt; "$CATALINA_OUT" 2&gt;&amp;1 "&amp;"</span><br><span class="line"></span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">if [ ! -z "$CATALINA_PID" ]; then</span><br><span class="line">echo $! &gt; "$CATALINA_PID"</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">echo "Tomcat started."</span><br></pre></td></tr></table></figure>
+<p>​    Tomcat 是一个由 java 语言编写的开源服务器，从脚本中我们可以看主，其启动类是 Bootstrap ，而且指定了调用的参数<code>start</code>，因此我们就从这个类开始深入，一步步来看看整个启动的过程。</p>
+<h3 id="启动入口Bootstrap-main"><a href="#启动入口Bootstrap-main" class="headerlink" title="启动入口Bootstrap.main()"></a>启动入口<code>Bootstrap.main()</code></h3><p>​    从上一节我们知道，Tomcat 的启动入口在 <code>Bootstrap.main()</code>，我们进入这个方法看看（<strong><em>注意：省略了很多非关注点的代码</em></strong>）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (daemonLock) &#123;</span><br><span class="line">        Bootstrap bootstrap = <span class="keyword">new</span> Bootstrap();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 初始化 bootstrap</span></span><br><span class="line">            bootstrap.init();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">    		<span class="comment">// 省略非关注点代码 ...</span></span><br><span class="line">        &#125;</span><br><span class="line">        daemon = bootstrap;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (command.equals(<span class="string">"start"</span>)) &#123;</span><br><span class="line">            daemon.setAwait(<span class="keyword">true</span>);</span><br><span class="line">            daemon.load(args);</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 开始启动</span></span><br><span class="line">            daemon.start();</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">null</span> == daemon.getServer()) &#123;</span><br><span class="line">                System.exit(<span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">    	<span class="comment">// 省略非关注点代码 ...</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Bootstrp-init-gt-Catalina-init"><a href="#Bootstrp-init-gt-Catalina-init" class="headerlink" title="Bootstrp.init() -&gt; Catalina.init()"></a>Bootstrp.init() -&gt; Catalina.init()</h3><p>​    主要过程的代码还是比较简洁的，这利益于Tomcat采用的 <strong>Lifecycle</strong> 模式，将整个过程封装到组件的各个生命周期中去了。关于 <strong>Lifecycle</strong> 设计模式的讲解可以关注我的另外一篇文章<a href="#">Tomcat对于Lifecycle的精妙使用</a>。从源码看，先是初始化了<code>bootstrap.init</code>，之后将加载参数后进入到了<code>bootstrap.start</code>过程，下面我们先看看<code>bootstrap.init</code>的源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Initialize daemon.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> Exception Fatal initialization error</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">    initClassLoaders();</span><br><span class="line"></span><br><span class="line">    Thread.currentThread().setContextClassLoader(catalinaLoader);</span><br><span class="line"></span><br><span class="line">    SecurityClassLoad.securityClassLoad(catalinaLoader);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Load our startup class and call its process() method</span></span><br><span class="line">    <span class="keyword">if</span> (log.isDebugEnabled())</span><br><span class="line">        log.debug(<span class="string">"Loading startup class"</span>);</span><br><span class="line">    Class&lt;?&gt; startupClass = catalinaLoader.loadClass(<span class="string">"org.apache.catalina.startup.Catalina"</span>);</span><br><span class="line">    Object startupInstance = startupClass.getConstructor().newInstance();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Set the shared extensions class loader</span></span><br><span class="line">    <span class="keyword">if</span> (log.isDebugEnabled())</span><br><span class="line">        log.debug(<span class="string">"Setting startup class properties"</span>);</span><br><span class="line">    String methodName = <span class="string">"setParentClassLoader"</span>;</span><br><span class="line">    Class&lt;?&gt; paramTypes[] = <span class="keyword">new</span> Class[<span class="number">1</span>];</span><br><span class="line">    paramTypes[<span class="number">0</span>] = Class.forName(<span class="string">"java.lang.ClassLoader"</span>);</span><br><span class="line">    Object paramValues[] = <span class="keyword">new</span> Object[<span class="number">1</span>];</span><br><span class="line">    paramValues[<span class="number">0</span>] = sharedLoader;</span><br><span class="line">    Method method = startupInstance.getClass().getMethod(methodName, paramTypes);</span><br><span class="line">    method.invoke(startupInstance, paramValues);</span><br><span class="line"></span><br><span class="line">    catalinaDaemon = startupInstance;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    可以看到，所做的一切就是初始化一个<code>org.apache.catalina.startup.Catalina</code>实例，并设置其<code>classLoader</code>，过程如下：</p>
+<ol>
+<li>初始化路径</li>
+<li>初始化类加载器：初始化Tomcat类加载器：commonLoader、catalinaLoader、sharedLoader<br>commonLoader无父加载器，catalinaLoader和sharedLoader的父加载器都是commonLoader，其中若tomcat的配置文件没有配置：<code>server.loader</code>则catalinaLoader=commonLoader，同理，没配置shared.loader……,这三种都是URLClassLoader，使用Java 中的安全模型；</li>
+<li>初始化Boostrap的Catalina对象：通过反射生成Catalina对象，并通过反射调用<code>setParentClassLoader</code>方法设置其父 ClassLoader为sharedLoader。为什么要用反射，不直接在声明的时候生成对象？使用反射来生成实例的原因是因为在tomcat的发展历史中可能不止Catalina一种启动方式，现在看代码已经没必要了。</li>
+<li>其他：主线程的classLoader设置为catalinaLoader，安全管理的ClassLoad设置为catalineLoader。</li>
+</ol>
+<p>​    其<code>start</code>方法同样简单，刚刚不是初始化了一个<code>Catalina</code>实例吗，那么现在的<code>start</code>方法就是被代理到<code>Catalina#start()</code>方法上去了，源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (catalinaDaemon == <span class="keyword">null</span>) init();</span><br><span class="line"></span><br><span class="line">    Method method = catalinaDaemon.getClass().getMethod(<span class="string">"start"</span>, (Class[]) <span class="keyword">null</span>);</span><br><span class="line">    method.invoke(catalinaDaemon, (Object[]) <span class="keyword">null</span>);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    所以，整个启动过程其实是在<code>Catalina#start()</code>中。</p>
+<h3 id="Bootstrap-start-gt-Catalina-start"><a href="#Bootstrap-start-gt-Catalina-start" class="headerlink" title="Bootstrap.start() -&gt; Catalina.start()"></a>Bootstrap.start() -&gt; Catalina.start()</h3><p>​    接下来的初始化过程就交由到 <code>Catalina.start</code> 方法了，看看主要代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Start a new server instance.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (getServer() == <span class="keyword">null</span>) &#123;</span><br><span class="line">        load();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (getServer() == <span class="keyword">null</span>) &#123;</span><br><span class="line">        log.fatal(<span class="string">"Cannot start server. Server instance is not configured."</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">long</span> t1 = System.nanoTime();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Start the new server</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        getServer().start();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (LifecycleException e) &#123;</span><br><span class="line">        log.fatal(sm.getString(<span class="string">"catalina.serverStartFail"</span>), e);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            getServer().destroy();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (LifecycleException e1) &#123;</span><br><span class="line">            log.debug(<span class="string">"destroy() failed for failed Server "</span>, e1);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">long</span> t2 = System.nanoTime();</span><br><span class="line">    <span class="keyword">if</span>(log.isInfoEnabled()) &#123;</span><br><span class="line">        log.info(<span class="string">"Server startup in "</span> + ((t2 - t1) / <span class="number">1000000</span>) + <span class="string">" ms"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Register shutdown hook</span></span><br><span class="line">    <span class="keyword">if</span> (useShutdownHook) &#123;</span><br><span class="line">        <span class="keyword">if</span> (shutdownHook == <span class="keyword">null</span>) &#123;</span><br><span class="line">            shutdownHook = <span class="keyword">new</span> CatalinaShutdownHook();</span><br><span class="line">        &#125;</span><br><span class="line">        Runtime.getRuntime().addShutdownHook(shutdownHook);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// If JULI is being used, disable JULI's shutdown hook since</span></span><br><span class="line">        <span class="comment">// shutdown hooks run in parallel and log messages may be lost</span></span><br><span class="line">        <span class="comment">// if JULI's hook completes before the CatalinaShutdownHook()</span></span><br><span class="line">        LogManager logManager = LogManager.getLogManager();</span><br><span class="line">        <span class="keyword">if</span> (logManager <span class="keyword">instanceof</span> ClassLoaderLogManager) &#123;</span><br><span class="line">            ((ClassLoaderLogManager) logManager).setUseShutdownHook(</span><br><span class="line">                    <span class="keyword">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (await) &#123;</span><br><span class="line">        await();</span><br><span class="line">        stop();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    这是整个启动过程的重头戏，我们将分段讲解其各个环节。</p>
+<h4 id="初始化-Server-load"><a href="#初始化-Server-load" class="headerlink" title="初始化 Server.load()"></a>初始化 <code>Server.load()</code></h4><p>​    从源码中可以看到，当 <code>server == null</code>时，将会执行 Server 的初始化工作，调用其 <code>load()</code> 方法设置 Server的各个参数（<strong>我们经常打交道的 <code>server.xml</code> 解析与设计工作在此完成</strong>）。我们看看这个方法的主要执行过程（省略非关注点代码）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">load</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	...</span><br><span class="line">	initDirs();</span><br><span class="line">	initNaming();</span><br><span class="line">	...</span><br><span class="line">	<span class="comment">// Create and execute our Digester</span></span><br><span class="line">	Digester digester = createStartDigester();</span><br><span class="line">	...</span><br><span class="line">	InputSource inputSource = <span class="keyword">null</span>;</span><br><span class="line">	InputStream inputStream = <span class="keyword">null</span>;</span><br><span class="line">	File file = <span class="keyword">null</span>;</span><br><span class="line">	...</span><br><span class="line">	file = configFile();</span><br><span class="line">	inputStream = <span class="keyword">new</span> FileInputStream(file);</span><br><span class="line">	inputSource = <span class="keyword">new</span> InputSource(file.toURI().toURL().toString());</span><br><span class="line">	...</span><br><span class="line">	inputSource.setByteStream(inputStream);</span><br><span class="line">	digester.push(<span class="keyword">this</span>);</span><br><span class="line">	digester.parse(inputSource);</span><br><span class="line">	...</span><br><span class="line">	getServer().setCatalina(<span class="keyword">this</span>);</span><br><span class="line"> 	...</span><br><span class="line">	getServer().init();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    整个过程如下：</p>
+<ol>
+<li>初始化各类目录结构</li>
+<li>初始化命名空间，为XML解析铺垫</li>
+<li>初始化 <code>Digester</code>，开始解析<code>server.xml</code>并将解析后的内容设置到<code>Server</code>对象中（默认的配置文件定义：<code>protected String configFile = &quot;conf/server.xml&quot;;</code>）。</li>
+<li>获取<code>Server</code>并执行其<code>init</code>方法。</li>
+</ol>
+<blockquote>
+<p>关于<code>Digester</code>的用法可以去参考我另外的文章：<a href="#">Digester：将XML转换为Java对象</a></p>
+</blockquote>
+<h4 id="初始化-Server-init"><a href="#初始化-Server-init" class="headerlink" title="初始化 Server.init()"></a>初始化 <code>Server.init()</code></h4><p>​    Server 同时实现了<strong>Lifecycle</strong>接口，其具体的<code>init</code>过程我们可以从<code>StandardServer.initInternal</code>方法进行研究：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">startInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line"></span><br><span class="line">    fireLifecycleEvent(CONFIGURE_START_EVENT, <span class="keyword">null</span>);</span><br><span class="line">    setState(LifecycleState.STARTING);</span><br><span class="line"></span><br><span class="line">    globalNamingResources.start();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Start our defined Services</span></span><br><span class="line">    <span class="keyword">synchronized</span> (servicesLock) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; services.length; i++) &#123;</span><br><span class="line">            services[i].start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    除了设置状态，触发相应的事件之外，这里还启动了 JNDI 的生命周期，用于完成 JNDI 的配置和初始化过程，JNDI 是 J2EE 规范的组件，有兴趣的同学可以参考我的另外一篇文章：<a href="#">有趣的 JNDI</a>。</p>
+<p>​    紧接着就是循环的启动所有的<code>Service</code>组件，<strong>注意，这里是<code>Service</code>而不是<code>Server</code>，<code>Service</code>和<code>Connector</code>，<code>Engine</code>，<code>Host</code>一样，是Tomcat的核心组件，后面会详细的讲解。</strong></p>
+<blockquote>
+<p><code>StandardServer</code> 只是 Tomcat Server 的一个标准实现，相较于标准实现，它还有另外一个版本：<code>EmbeddedTomcat</code>，即内嵌的Tomcat。</p>
+</blockquote>
+<h4 id="初始化-Service-init"><a href="#初始化-Service-init" class="headerlink" title="初始化 Service.init()"></a>初始化 <code>Service.init()</code></h4><p>​    跟<code>Server</code>一样，<code>Service的</code>实现也叫<code>StandardService</code>，其初始化过程也是<code>StandardService.initInternal()</code>中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">super</span>.initInternal();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (engine != <span class="keyword">null</span>) &#123;</span><br><span class="line">        engine.init();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Initialize any Executors</span></span><br><span class="line">    <span class="keyword">for</span> (Executor executor : findExecutors()) &#123;</span><br><span class="line">        <span class="keyword">if</span> (executor <span class="keyword">instanceof</span> JmxEnabled) &#123;</span><br><span class="line">            ((JmxEnabled) executor).setDomain(getDomain());</span><br><span class="line">        &#125;</span><br><span class="line">        executor.init();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Initialize mapper listener</span></span><br><span class="line">    mapperListener.init();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Initialize our defined Connectors</span></span><br><span class="line">    <span class="keyword">synchronized</span> (connectorsLock) &#123;</span><br><span class="line">        <span class="keyword">for</span> (Connector connector : connectors) &#123;</span><br><span class="line">            connector.init();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    过程包括如下的几个核心点：</p>
+<ol>
+<li><p>初始化 <code>Engine</code>，<code>Engine</code>在整个Tomcat源码框架中的戏份不多，当用户的请求到来时，到<code>MapperData</code>中获取对应的<code>Host</code>，并让请求通过<code>Host</code>的<code>Pipeline</code>。</p>
+</li>
+<li><p>初始化 <code>Executor</code>，这是线程池的配置，在<code>server.xml</code>的中配置如下所示：</p>
+ <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--The connectors can use a shared executor, you can define one or more named thread pools--&gt;</span></span><br><span class="line"><span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">&lt;Executor name="tomcatThreadPool" namePrefix="catalina-exec-"</span></span><br><span class="line"><span class="comment">    maxThreads="150" minSpareThreads="4"/&gt;</span></span><br><span class="line"><span class="comment">--&gt;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>初始化 <code>MapperListener</code>，这一步非常的简单，很容易就被忽略，但其实 <strong>非常非常</strong> 的重要，如果想要弄清楚Tomcat是如何分发路由请求，一定要了解这个组件。我的另外一篇文章<a href="#">Tomcat的路由游戏</a>对这个有详细的讲解。</p>
+</li>
+<li><p>初始化各个<code>Connector</code>，这个组件非常重要，这个我们单独用一节来讲解。</p>
+</li>
+</ol>
+<h4 id="初始化-Connector-init"><a href="#初始化-Connector-init" class="headerlink" title="初始化 Connector.init()"></a>初始化 <code>Connector.init()</code></h4><p>​    <code>Connector</code>是整个Tomcat中比较重要的一个组件，甚至说是最核心的组件都不为过，它的主要任务是负责接收浏览器发过来的TCP连接请求，创建 <strong>Request</strong> 和 <strong>Response</strong> 对象来封装接收、发送数据，然后把数据交给Container进行处理。</p>
+<p>​    如果你仔细查看过<code>server.xml</code>的话，会发现一个<code>Service</code>节点下可以有很多的<code>Connector</code>，每个<code>Connector</code>都可以监听不同的端口，采用不同的协议来和用户交互。如下所示（我们在<strong><em>8080</em></strong>端口监听普通的请求，在 <strong><em>8443</em></strong> 监听 SSL 请求）：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">Connector</span> <span class="attr">port</span>=<span class="string">"8080"</span> <span class="attr">protocol</span>=<span class="string">"HTTP/1.1"</span></span></span><br><span class="line"><span class="tag">               <span class="attr">connectionTimeout</span>=<span class="string">"20000"</span></span></span><br><span class="line"><span class="tag">               <span class="attr">redirectPort</span>=<span class="string">"8443"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">Connector</span> <span class="attr">port</span>=<span class="string">"8443"</span> <span class="attr">protocol</span>=<span class="string">"org.apache.coyote.http11.Http11NioProtocol"</span> <span class="attr">maxThreads</span>=<span class="string">"150"</span> <span class="attr">SSLEnabled</span>=<span class="string">"true"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">SSLHostConfig</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Certificate</span> <span class="attr">certificateKeystoreFile</span>=<span class="string">"conf/localhost-rsa.jks"</span> <span class="attr">type</span>=<span class="string">"RSA"</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">SSLHostConfig</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Connector</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>​    当然以上这些工作都是在它启动之后，它的初始化过程其实是比较简单的，代码同样也是在<code>Connector.initInternal()</code>中，核心代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initInternal</span><span class="params">()</span> <span class="keyword">throws</span> LifecycleException </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">super</span>.initInternal();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (protocolHandler == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> LifecycleException(</span><br><span class="line">                sm.getString(<span class="string">"coyoteConnector.protocolHandlerInstantiationFailed"</span>));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Initialize adapter</span></span><br><span class="line">    adapter = <span class="keyword">new</span> CoyoteAdapter(<span class="keyword">this</span>);</span><br><span class="line">    protocolHandler.setAdapter(adapter);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Make sure parseBodyMethodsSet has a default</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">null</span> == parseBodyMethodsSet) &#123;</span><br><span class="line">        setParseBodyMethods(getParseBodyMethods());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (protocolHandler.isAprRequired() &amp;&amp; !AprLifecycleListener.isAprAvailable()) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> LifecycleException(sm.getString(<span class="string">"coyoteConnector.protocolHandlerNoApr"</span>,</span><br><span class="line">                getProtocolHandlerClassName()));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (AprLifecycleListener.isAprAvailable() &amp;&amp; AprLifecycleListener.getUseOpenSSL() &amp;&amp;</span><br><span class="line">            protocolHandler <span class="keyword">instanceof</span> AbstractHttp11JsseProtocol) &#123;</span><br><span class="line">        AbstractHttp11JsseProtocol&lt;?&gt; jsseProtocolHandler =</span><br><span class="line">                (AbstractHttp11JsseProtocol&lt;?&gt;) protocolHandler;</span><br><span class="line">        <span class="keyword">if</span> (jsseProtocolHandler.isSSLEnabled() &amp;&amp;</span><br><span class="line">                jsseProtocolHandler.getSslImplementationName() == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="comment">// OpenSSL is compatible with the JSSE configuration, so use it if APR is available</span></span><br><span class="line">            jsseProtocolHandler.setSslImplementationName(OpenSSLImplementation<span class="class">.<span class="keyword">class</span>.<span class="title">getName</span>())</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        protocolHandler.init();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> LifecycleException(</span><br><span class="line">                sm.getString(<span class="string">"coyoteConnector.protocolHandlerInitializationFailed"</span>), e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    就是根据不同的<code>Connector</code>配置进行必要的设置（如<code>SSL</code>的支持等），之后就交给各个<code>ProtocolHandler</code>去根据不同的协议进行相应的初始化，常见的如<code>Http11NioProtocol</code>，<code>AjpNioProtocol</code>等。</p>
+<h4 id="服务启动-Server-start（）"><a href="#服务启动-Server-start（）" class="headerlink" title="服务启动 Server.start（）"></a>服务启动 <code>Server.start（）</code></h4><p>​    随着<code>Connector</code>的初始化完成，<code>Server.load()</code>过程也结束，接下来就是<code>Server.start()</code>过程。</p>
+<p>​    分析过<code>init()</code>方法后再来看其<code>start()</code>就简单得多了，几乎是整个<code>init()</code>过程的复制粘贴，只不过将过程中的<code>init()</code>方法换成了<code>start()</code>方法，<code>start()</code>方法让各个组件正式启动开始服役，为用户提供服务，各个<code>ProtocolHandler</code>开始监听网络端口，接收用户的请求并作出响应。</p>
+<blockquote>
+<p> 从这个过程中可以看到，Tomcat的整个容器构成是非常有层次的，分别是 <code>Server</code> -&gt; <code>Service</code> -&gt; <code>Connector</code>/ <code>Engine</code> -&gt;  <code>Host</code>。我有另外一篇文章专门讲解了这些组件之间的关系：<a href="#">Tomcat源码解读：组件</a>。</p>
+</blockquote>
+<p>​    这里要提一下我们的<code>Servlet</code>的注册入口，其实是隐藏在<code>Context.start()</code>过程中的，在这个过程中发布了一个事件<code>fireLifecycleEvent(Lifecycle.CONFIGURE_START_EVENT, null);</code>，而这个事件会被<code>ContextConfig</code>捕获，如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">lifecycleEvent</span><span class="params">(LifecycleEvent event)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Identify the context we are associated with</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        context = (Context) event.getLifecycle();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (ClassCastException e) &#123;</span><br><span class="line">        log.error(sm.getString(<span class="string">"contextConfig.cce"</span>, event.getLifecycle()), e);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Process the event that has occurred</span></span><br><span class="line">    <span class="keyword">if</span> (event.getType().equals(Lifecycle.CONFIGURE_START_EVENT)) &#123;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 这里开始进行配置</span></span><br><span class="line">        configureStart();</span><br><span class="line">        </span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (event.getType().equals(Lifecycle.BEFORE_START_EVENT)) &#123;</span><br><span class="line">        beforeStart();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (event.getType().equals(Lifecycle.AFTER_START_EVENT)) &#123;</span><br><span class="line">        <span class="comment">// Restore docBase for management tools</span></span><br><span class="line">        <span class="keyword">if</span> (originalDocBase != <span class="keyword">null</span>) &#123;</span><br><span class="line">            context.setDocBase(originalDocBase);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (event.getType().equals(Lifecycle.CONFIGURE_STOP_EVENT)) &#123;</span><br><span class="line">        configureStop();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (event.getType().equals(Lifecycle.AFTER_INIT_EVENT)) &#123;</span><br><span class="line">        init();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (event.getType().equals(Lifecycle.AFTER_DESTROY_EVENT)) &#123;</span><br><span class="line">        destroy();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    一路跟踪的路径如下：<code>webConfig()</code> -&gt; <code>configureContext(webXml)</code> -&gt; <code>context.addServletMappingDecoded(urlPattern, jspServletName, true);</code> 这就是我们在<code>web.xml</code>中配置的所有的<code>Servlet</code>注册过程。</p>
+<h3 id="优雅的关闭：ShutdownHook"><a href="#优雅的关闭：ShutdownHook" class="headerlink" title="优雅的关闭：ShutdownHook"></a>优雅的关闭：<code>ShutdownHook</code></h3><p>​    回过头去看<code>Catalina.start()</code>知道，在完成 <code>Server.start()</code> 后还有一段代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Register shutdown hook</span></span><br><span class="line"><span class="keyword">if</span> (useShutdownHook) &#123;</span><br><span class="line">    <span class="keyword">if</span> (shutdownHook == <span class="keyword">null</span>) &#123;</span><br><span class="line">        shutdownHook = <span class="keyword">new</span> CatalinaShutdownHook();</span><br><span class="line">    &#125;</span><br><span class="line">    Runtime.getRuntime().addShutdownHook(shutdownHook);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If JULI is being used, disable JULI's shutdown hook since</span></span><br><span class="line">    <span class="comment">// shutdown hooks run in parallel and log messages may be lost</span></span><br><span class="line">    <span class="comment">// if JULI's hook completes before the CatalinaShutdownHook()</span></span><br><span class="line">    LogManager logManager = LogManager.getLogManager();</span><br><span class="line">    <span class="keyword">if</span> (logManager <span class="keyword">instanceof</span> ClassLoaderLogManager) &#123;</span><br><span class="line">        ((ClassLoaderLogManager) logManager).setUseShutdownHook(<span class="keyword">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    这是一段标准的Java钩子函数的注册过程，<code>Runtime.getRuntime().addShutdownHook</code>注册的钩子将会在JVM退出时执行。</p>
+<p>​    Tomcat在这里注册的钩子用于保证优雅的关闭Tomcat容器，包括关闭打开的JNDI资源，数据库驱动，关闭线程池，清理fork出来的子线程等等。部分代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Clear references.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">clearReferences</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// If the JVM is shutting down, skip the memory leak checks</span></span><br><span class="line">    <span class="keyword">if</span> (skipMemoryLeakChecksOnJvmShutdown</span><br><span class="line">        &amp;&amp; !resources.getContext().getParent().getState().isAvailable()) &#123;</span><br><span class="line">        <span class="comment">// During reloading / redeployment the parent is expected to be</span></span><br><span class="line">        <span class="comment">// available. Parent is not available so this might be a JVM</span></span><br><span class="line">        <span class="comment">// shutdown.</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread dummyHook = <span class="keyword">new</span> Thread();</span><br><span class="line">            Runtime.getRuntime().addShutdownHook(dummyHook);</span><br><span class="line">            Runtime.getRuntime().removeShutdownHook(dummyHook);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IllegalStateException ise) &#123;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// De-register any remaining JDBC drivers</span></span><br><span class="line">    clearReferencesJdbc();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Stop any threads the web application started</span></span><br><span class="line">    clearReferencesThreads();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Clear any references retained in the serialization caches</span></span><br><span class="line">    <span class="keyword">if</span> (clearReferencesObjectStreamClassCaches) &#123;</span><br><span class="line">        clearReferencesObjectStreamClassCaches();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Check for leaks triggered by ThreadLocals loaded by this class loader</span></span><br><span class="line">    checkThreadLocalsForLeaks();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Clear RMI Targets loaded by this class loader</span></span><br><span class="line">    <span class="keyword">if</span> (clearReferencesRmiTargets) &#123;</span><br><span class="line">        clearReferencesRmiTargets();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">     <span class="comment">// Clear the IntrospectionUtils cache.</span></span><br><span class="line">    IntrospectionUtils.clear();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Clear the classloader reference in common-logging</span></span><br><span class="line">    <span class="keyword">if</span> (clearReferencesLogFactoryRelease) &#123;</span><br><span class="line">        org.apache.juli.logging.LogFactory.release(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Clear the classloader reference in the VM's bean introspector</span></span><br><span class="line">    java.beans.Introspector.flushCaches();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Clear any custom URLStreamHandlers</span></span><br><span class="line">    TomcatURLStreamHandlerFactory.release(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    那么，Tomcat是如何知道容器中有哪些由于用户的请求而<strong>fork</strong>出来的线程，并在关闭时及时的清理呢？可以关注我的另外一篇文章：<a href="#">Tomcat源码解读：Connector之一个请求的完整历程</a>。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>​    至此，整个Tomcat的启动过程结束，可以看出还是比较 <strong>简洁</strong> 的，结构非常的清晰，遵循<code>Lifecycle</code>的生命周期，在<code>init</code>和<code>start</code>阶段就完整了整个容器的构建过程。</p>
+<p>​    通过这个过程的分析我们可以学习到怎么构建一个层次分明的容器关系，怎么利用 <code>Lifecycle</code> 模式分而治之地编码，怎么优雅地关闭容器。同时也了解到Tomcat各个组件的关系及用途，能够更好地优化Tomcat的运行性能，进而定制更适合自己需要的Tomcat。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-wepay.jpg" alt="Ivan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-alipay.jpg" alt="Ivan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/源码阅读/" rel="tag"># 源码阅读</a>
+          
+            <a href="/tags/Tomcat/" rel="tag"># Tomcat</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/10/tomcat-yuan-ma-jie-du-connector/" rel="next" title="Tomcat源码解读——Connector之一个请求的完整历程">
+                <i class="fa fa-chevron-left"></i> Tomcat源码解读——Connector之一个请求的完整历程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/29/duan-lu-shi-bian-cheng-fast-break/" rel="prev" title="短路式编程（Fast-Break）">
+                短路式编程（Fast-Break） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/348097?s=460&v=4" alt="Ivan">
+            
+              <p class="site-author-name" itemprop="name">Ivan</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">104</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">99</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/huangfengjing" title="GitHub &rarr; https://github.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:huangfengjing@gmail.com" title="E-Mail &rarr; mailto:huangfengjing@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/huangfengjing" title="Weibo &rarr; https://weibo.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://plus.google.com/huangfengjing" title="Google &rarr; https://plus.google.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/huangfengjing" title="Twitter &rarr; https://twitter.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.facebook.com/huangfengjing" title="FB Page &rarr; https://www.facebook.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-facebook"></i>FB Page</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动脚本-startup-sh"><span class="nav-text">启动脚本 startup.sh</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动入口Bootstrap-main"><span class="nav-text">启动入口Bootstrap.main()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Bootstrp-init-gt-Catalina-init"><span class="nav-text">Bootstrp.init() -&gt; Catalina.init()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Bootstrap-start-gt-Catalina-start"><span class="nav-text">Bootstrap.start() -&gt; Catalina.start()</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#初始化-Server-load"><span class="nav-text">初始化 Server.load()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#初始化-Server-init"><span class="nav-text">初始化 Server.init()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#初始化-Service-init"><span class="nav-text">初始化 Service.init()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#初始化-Connector-init"><span class="nav-text">初始化 Connector.init()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#服务启动-Server-start（）"><span class="nav-text">服务启动 Server.start（）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优雅的关闭：ShutdownHook"><span class="nav-text">优雅的关闭：ShutdownHook</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ivan</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'sPghJWhcIktqFoKTHCULrW4R-gzGzoHsz',
+    appKey: 'BlHUFUqfO9HAKGSBaWWNuTUi',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

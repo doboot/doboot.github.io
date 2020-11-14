@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css">
+
+<link href="https://fonts.cat.net/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1. 概述典型的分布式系统由许多协作在一起的服务组成。 这些服务容易出现故障或延迟响应。如果服务失败，它可能会影响影响性能的其他服务，并可能使应用程序的其他部分无法访问，或者在最坏的情况下会导致整个应用程序崩溃。 当然，有一些解决方案可以帮助提高应用程序的弹性和容错能力 - 其中一个框架就是Hystrix。 Hystrix框架库通过提供容错和延迟容忍来帮助控制服务之间的交互。它通过隔离故障服务和停">
+<meta name="keywords" content="Hystrix,高可用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hystrix简介">
+<meta property="og:url" content="http://doboot.github.io/2016/03/25/hystrix-jian-jie/index.html">
+<meta property="og:site_name" content="Ivan&#39;s Blog">
+<meta property="og:description" content="1. 概述典型的分布式系统由许多协作在一起的服务组成。 这些服务容易出现故障或延迟响应。如果服务失败，它可能会影响影响性能的其他服务，并可能使应用程序的其他部分无法访问，或者在最坏的情况下会导致整个应用程序崩溃。 当然，有一些解决方案可以帮助提高应用程序的弹性和容错能力 - 其中一个框架就是Hystrix。 Hystrix框架库通过提供容错和延迟容忍来帮助控制服务之间的交互。它通过隔离故障服务和停">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-14T06:10:20.919Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hystrix简介">
+<meta name="twitter:description" content="1. 概述典型的分布式系统由许多协作在一起的服务组成。 这些服务容易出现故障或延迟响应。如果服务失败，它可能会影响影响性能的其他服务，并可能使应用程序的其他部分无法访问，或者在最坏的情况下会导致整个应用程序崩溃。 当然，有一些解决方案可以帮助提高应用程序的弹性和容错能力 - 其中一个框架就是Hystrix。 Hystrix框架库通过提供容错和延迟容忍来帮助控制服务之间的交互。它通过隔离故障服务和停">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Ivan's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://doboot.github.io/2016/03/25/hystrix-jian-jie/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Hystrix简介 | Ivan's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ivan's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">虽日暮途远，仍梦想诗和远方</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://doboot.github.io/2016/03/25/hystrix-jian-jie/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ivan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/348097?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ivan's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hystrix简介
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2016-03-25 15:55:00" itemprop="dateCreated datePublished" datetime="2016-03-25T15:55:00+08:00">2016-03-25</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-14 14:10:20" itemprop="dateModified" datetime="2020-11-14T14:10:20+08:00">2020-11-14</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2016/03/25/hystrix-jian-jie/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2016/03/25/hystrix-jian-jie/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">8.5k</span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h2><p>典型的分布式系统由许多协作在一起的服务组成。</p>
+<p>这些服务容易出现故障或延迟响应。如果服务失败，它可能会影响影响性能的其他服务，并可能使应用程序的其他部分无法访问，或者在最坏的情况下会导致整个应用程序崩溃。</p>
+<p><strong>当然，有一些解决方案可以帮助提高应用程序的弹性和容错能力 - 其中一个框架就是Hystrix。</strong></p>
+<p>Hystrix框架库通过提供容错和延迟容忍来帮助控制服务之间的交互。它通过隔离故障服务和停止故障的级联效应来提高系统的整体弹性。</p>
+<p>在本系列文章中，我们将首先了解Hystrix在服务或系统出现故障时如何解决问题以及Hystrix在这些情况下可以完成的任务。<br><a id="more"></a></p>
+<h2 id="2-简单的例子"><a href="#2-简单的例子" class="headerlink" title="2. 简单的例子"></a>2. 简单的例子</h2><p>Hystrix提供故障和延迟容忍的方式是隔离和包装对远程服务的调用。</p>
+<p>在这个简单的例子中，我们在<em>HystrixCommand</em>的<em>run()</em>方法中包装一个调用<em>：</em></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CommandHelloWorld</span> <span class="keyword">extends</span> <span class="title">HystrixCommand</span>&lt;<span class="title">String</span>&gt; </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"> </span><br><span class="line">    CommandHelloWorld(String name) &#123;</span><br><span class="line">        <span class="keyword">super</span>(HystrixCommandGroupKey.Factory.asKey(<span class="string">"ExampleGroup"</span>));</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> String <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Hello "</span> + name + <span class="string">"!"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们按如下方式执行调用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">givenInputBobAndDefaultSettings_whenCommandExecuted_thenReturnHelloBob</span><span class="params">()</span></span>&#123;</span><br><span class="line">    assertThat(<span class="keyword">new</span> CommandHelloWorld(<span class="string">"Bob"</span>).execute(), equalTo(<span class="string">"Hello Bob!"</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="3-Maven设置"><a href="#3-Maven设置" class="headerlink" title="3. Maven设置"></a>3. Maven设置</h2><p>要在Maven项目中使用Hystrix，我们需要在项目<em>pom.xml中使用</em> Netflix的<em>hystrix-core</em>和<em>rxjava-core</em>依赖项：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.hystrix<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>hystrix-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.5.4<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>最新版本总是可以在<a href="https://search.maven.org/classic/#search%7Cga%7C1%7Ca%3A%22hystrix-core%22" target="_blank" rel="noopener">这里</a>找到。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.netflix.rxjava<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>rxjava-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.20.7<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>可以在<a href="https://search.maven.org/classic/#search%7Cga%7C1%7Ca%3A%22rxjava-core%22" target="_blank" rel="noopener">此处</a>找到此库的最新版本。</p>
+<h2 id="4-设置远程服务"><a href="#4-设置远程服务" class="headerlink" title="4. 设置远程服务"></a>4. 设置远程服务</h2><p>让我们从模拟现实世界的例子开始。</p>
+<p><strong>在下面的示例中</strong>，<em>RemoteServiceTestSimulator</em>类表示远程服务器上的服务。它有一种方法，在给定的时间段后响应消息。我们可以想象，这种等待模拟了远程系统中耗时的过程，导致对呼叫服务的响应延迟：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RemoteServiceTestSimulator</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> wait;</span><br><span class="line"> </span><br><span class="line">    RemoteServiceTestSimulator(<span class="keyword">long</span> wait) <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="keyword">this</span>.wait = wait;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function">String <span class="title">execute</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        Thread.sleep(wait);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Success"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>这是我们</strong>调用<em>RemoteServiceTestSimulator的**</em>示例客户端**。</p>
+<p>对服务的调用是隔离的，并包装在<em>HystrixCommand</em>的<em>run()</em>方法中<em>。</em>它的这种包装提供了我们上面提到的弹性：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RemoteServiceTestCommand</span> <span class="keyword">extends</span> <span class="title">HystrixCommand</span>&lt;<span class="title">String</span>&gt; </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> RemoteServiceTestSimulator remoteService;</span><br><span class="line"> </span><br><span class="line">    RemoteServiceTestCommand(Setter config, RemoteServiceTestSimulator remoteService) &#123;</span><br><span class="line">        <span class="keyword">super</span>(config);</span><br><span class="line">        <span class="keyword">this</span>.remoteService = remoteService;</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> String <span class="title">run</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> remoteService.execute();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>通过在<em>RemoteServiceTestCommand</em>对象的实例上调用<em>execute()</em>方法来执行调用。</p>
+<p>以下测试演示了如何完成此操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">givenSvcTimeoutOf100AndDefaultSettings_whenRemoteSvcExecuted_thenReturnSuccess</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> </span><br><span class="line">    HystrixCommand.Setter config = HystrixCommand</span><br><span class="line">      .Setter</span><br><span class="line">      .withGroupKey(HystrixCommandGroupKey.Factory.asKey(<span class="string">"RemoteServiceGroup2"</span>));</span><br><span class="line">     </span><br><span class="line">    assertThat(<span class="keyword">new</span> RemoteServiceTestCommand(config, <span class="keyword">new</span> RemoteServiceTestSimulator(<span class="number">100</span>)).execute(),</span><br><span class="line">      equalTo(<span class="string">"Success"</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>到目前为止，我们已经了解了如何在<em>HystrixCommand</em>对象中包装远程服务调用。在下面的部分中，我们将看看如何处理远程服务开始恶化的情况。</p>
+<h2 id="5-使用远程服务和防御性编程"><a href="#5-使用远程服务和防御性编程" class="headerlink" title="5. 使用远程服务和防御性编程"></a>5. 使用远程服务和防御性编程</h2><h3 id="5-1-具有超时的防御性编程"><a href="#5-1-具有超时的防御性编程" class="headerlink" title="5.1 具有超时的防御性编程"></a>5.1 具有超时的防御性编程</h3><p>通常的编程习惯是为远程服务的呼叫设置超时。</p>
+<p>让我们首先看看如何在<em>HystrixCommand</em>上设置超时以及它如何通过短路来帮助：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">givenSvcTimeoutOf5000AndExecTimeoutOf10000_whenRemoteSvcExecuted_thenReturnSuccess</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> </span><br><span class="line">    HystrixCommand.Setter config = HystrixCommand</span><br><span class="line">      .Setter</span><br><span class="line">      .withGroupKey(HystrixCommandGroupKey.Factory.asKey(<span class="string">"RemoteServiceGroupTest4"</span>));</span><br><span class="line"> </span><br><span class="line">    HystrixCommandProperties.Setter commandProperties = HystrixCommandProperties.Setter();</span><br><span class="line">    commandProperties.withExecutionTimeoutInMilliseconds(<span class="number">10_000</span>);</span><br><span class="line">    config.andCommandPropertiesDefaults(commandProperties);</span><br><span class="line"> </span><br><span class="line">    assertThat(<span class="keyword">new</span> RemoteServiceTestCommand(config, <span class="keyword">new</span> RemoteServiceTestSimulator(<span class="number">500</span>)).execute(),</span><br><span class="line">      equalTo(<span class="string">"Success"</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上面的测试中，我们通过将超时设置为500毫秒来延迟服务的响应。我们还将<em>HystrixCommand</em>的执行超时设置为10,000 ms，从而为远程服务提供足够的响应时间。</p>
+<p>现在让我们看看当执行超时小于服务超时调用时会发生什么：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span>(expected = HystrixRuntimeException<span class="class">.<span class="keyword">class</span>)</span></span><br><span class="line"><span class="class"><span class="title">public</span> <span class="title">void</span> <span class="title">givenSvcTimeoutOf15000AndExecTimeoutOf5000_whenRemoteSvcExecuted_thenExpectHre</span>()</span></span><br><span class="line"><span class="class">  <span class="title">throws</span> <span class="title">InterruptedException</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    HystrixCommand.Setter config = HystrixCommand</span><br><span class="line">      .Setter</span><br><span class="line">      .withGroupKey(HystrixCommandGroupKey.Factory.asKey(<span class="string">"RemoteServiceGroupTest5"</span>));</span><br><span class="line"> </span><br><span class="line">    HystrixCommandProperties.Setter commandProperties = HystrixCommandProperties.Setter();</span><br><span class="line">    commandProperties.withExecutionTimeoutInMilliseconds(<span class="number">5_000</span>);</span><br><span class="line">    config.andCommandPropertiesDefaults(commandProperties);</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">new</span> RemoteServiceTestCommand(config, <span class="keyword">new</span> RemoteServiceTestSimulator(<span class="number">15_000</span>)).execute();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>请注意我们如何降低条形并将执行超时设置为5,000毫秒。</p>
+<p>我们期望服务在5,000毫秒内响应，而我们已将服务设置为在15,000毫秒后响应。如果您在执行测试时发现，测试将在5,000毫秒后退出，而不是等待15,000毫秒，并将抛出<em>HystrixRuntimeException</em>。</p>
+<p><strong>这演示了Hystrix如何等待超过响应的配置超时。这有助于使受Hystrix保护的系统更具响应性。</strong></p>
+<p>在下面的部分中，我们将研究设置线程池大小，以防止线程耗尽，我们将讨论它的好处。</p>
+<h3 id="5-2-有限线程池的防御性编程"><a href="#5-2-有限线程池的防御性编程" class="headerlink" title="**5.2 有限线程池的防御性编程"></a>**5.2 有限线程池的防御性编程</h3><p>设置服务调用的超时并不能解决与远程服务相关的所有问题。</p>
+<p><strong>当远程服务开始响应缓慢时，典型应用程序将继续调用该远程服务。</strong></p>
+<p>应用程序不知道远程服务是否健康，并且每次请求进入时都会生成新线程。这将导致已经在使用的服务器上的线程被使用。</p>
+<p>我们不希望这种情况发生，因为我们需要这些线程用于在我们的服务器上运行的其他远程调用或进程，并且我们还希望避免CPU利用率飙升。</p>
+<p>让我们看看如何在<em>HystrixCommand中</em>设置线程池大小：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> givenSvcTimeoutOf500AndExecTimeoutOf10000AndThreadPool_whenRemoteSvcExecuted</span><br><span class="line">  _thenReturnSuccess() <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line"> </span><br><span class="line">    HystrixCommand.Setter config = HystrixCommand</span><br><span class="line">      .Setter</span><br><span class="line">      .withGroupKey(HystrixCommandGroupKey.Factory.asKey(<span class="string">"RemoteServiceGroupThreadPool"</span>));</span><br><span class="line"> </span><br><span class="line">    HystrixCommandProperties.Setter commandProperties = HystrixCommandProperties.Setter();</span><br><span class="line">    commandProperties.withExecutionTimeoutInMilliseconds(<span class="number">10_000</span>);</span><br><span class="line">    config.andCommandPropertiesDefaults(commandProperties);</span><br><span class="line">    config.andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter()</span><br><span class="line">      .withMaxQueueSize(<span class="number">10</span>)</span><br><span class="line">      .withCoreSize(<span class="number">3</span>)</span><br><span class="line">      .withQueueSizeRejectionThreshold(<span class="number">10</span>));</span><br><span class="line"> </span><br><span class="line">    assertThat(<span class="keyword">new</span> RemoteServiceTestCommand(config, <span class="keyword">new</span> RemoteServiceTestSimulator(<span class="number">500</span>)).execute(),</span><br><span class="line">      equalTo(<span class="string">"Success"</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上面的测试中，我们设置了最大队列大小，核心队列大小和队列拒绝大小。当最大线程数达到10且任务队列大小达到10时，<em>Hystrix</em>将开始拒绝请求。</p>
+<p>核心大小是始终在线程池中保持活动状态的线程数。</p>
+<h3 id="5-3-短路断路器模式的防御性编程"><a href="#5-3-短路断路器模式的防御性编程" class="headerlink" title="5.3 短路断路器模式的防御性编程"></a>5.3 短路断路器模式的防御性编程</h3><p>但是，我们可以对远程服务调用进行改进。</p>
+<p><strong>让我们考虑一下远程服务已经开始失败的情况。</strong></p>
+<p>我们不想继续向它发出请求并浪费资源。理想情况下，我们希望停止在一定时间内发出请求，以便在恢复请求之前提供恢复服务的时间。这就是所谓的<em>短路断路器</em>模式。</p>
+<p>让我们看看Hystrix如何实现这种模式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">givenCircuitBreakerSetup_whenRemoteSvcCmdExecuted_thenReturnSuccess</span><span class="params">()</span></span></span><br><span class="line"><span class="function">  <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> </span><br><span class="line">    HystrixCommand.Setter config = HystrixCommand</span><br><span class="line">      .Setter</span><br><span class="line">      .withGroupKey(HystrixCommandGroupKey.Factory.asKey(<span class="string">"RemoteServiceGroupCircuitBreaker"</span>));</span><br><span class="line"> </span><br><span class="line">    HystrixCommandProperties.Setter properties = HystrixCommandProperties.Setter();</span><br><span class="line">    properties.withExecutionTimeoutInMilliseconds(<span class="number">1000</span>);</span><br><span class="line">    properties.withCircuitBreakerSleepWindowInMilliseconds(<span class="number">4000</span>);</span><br><span class="line">    properties.withExecutionIsolationStrategy</span><br><span class="line">     (HystrixCommandProperties.ExecutionIsolationStrategy.THREAD);</span><br><span class="line">    properties.withCircuitBreakerEnabled(<span class="keyword">true</span>);</span><br><span class="line">    properties.withCircuitBreakerRequestVolumeThreshold(<span class="number">1</span>);</span><br><span class="line"> </span><br><span class="line">    config.andCommandPropertiesDefaults(properties);</span><br><span class="line">    config.andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter()</span><br><span class="line">      .withMaxQueueSize(<span class="number">1</span>)</span><br><span class="line">      .withCoreSize(<span class="number">1</span>)</span><br><span class="line">      .withQueueSizeRejectionThreshold(<span class="number">1</span>));</span><br><span class="line"> </span><br><span class="line">    assertThat(<span class="keyword">this</span>.invokeRemoteService(config, <span class="number">10_000</span>), equalTo(<span class="keyword">null</span>));</span><br><span class="line">    assertThat(<span class="keyword">this</span>.invokeRemoteService(config, <span class="number">10_000</span>), equalTo(<span class="keyword">null</span>));</span><br><span class="line">    assertThat(<span class="keyword">this</span>.invokeRemoteService(config, <span class="number">10_000</span>), equalTo(<span class="keyword">null</span>));</span><br><span class="line"> </span><br><span class="line">    Thread.sleep(<span class="number">5000</span>);</span><br><span class="line"> </span><br><span class="line">    assertThat(<span class="keyword">new</span> RemoteServiceTestCommand(config, <span class="keyword">new</span> RemoteServiceTestSimulator(<span class="number">500</span>)).execute(),</span><br><span class="line">      equalTo(<span class="string">"Success"</span>));</span><br><span class="line"> </span><br><span class="line">    assertThat(<span class="keyword">new</span> RemoteServiceTestCommand(config, <span class="keyword">new</span> RemoteServiceTestSimulator(<span class="number">500</span>)).execute(),</span><br><span class="line">      equalTo(<span class="string">"Success"</span>));</span><br><span class="line"> </span><br><span class="line">    assertThat(<span class="keyword">new</span> RemoteServiceTestCommand(config, <span class="keyword">new</span> RemoteServiceTestSimulator(<span class="number">500</span>)).execute(),</span><br><span class="line">      equalTo(<span class="string">"Success"</span>));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">invokeRemoteService</span><span class="params">(HystrixCommand.Setter config, <span class="keyword">int</span> timeout)</span></span></span><br><span class="line"><span class="function">  <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"> </span><br><span class="line">    String response = <span class="keyword">null</span>;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        response = <span class="keyword">new</span> RemoteServiceTestCommand(config,</span><br><span class="line">          <span class="keyword">new</span> RemoteServiceTestSimulator(timeout)).execute();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (HystrixRuntimeException ex) &#123;</span><br><span class="line">        System.out.println(<span class="string">"ex = "</span> + ex);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> response;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在上述测试中，我们设置了不同的断路器属性。最重要的是：</p>
+<ul>
+<li>该<em>CircuitBreakerSleepWindow</em>被设置为4000毫秒。这将配置断路器窗口并定义将恢复对远程服务的请求的时间间隔</li>
+<li>所述<em>CircuitBreakerRequestVolumeThreshold</em>其被设置为1，定义了故障率将被认为之前所需的请求的最小数目</li>
+</ul>
+<p>在上述设置到位后，我们的<em>HystrixCommand</em>将在两次失败请求后立即打开。即使我们将服务延迟设置为500毫秒，第三个请求甚至不会命中远程服务，<em>Hystrix</em>会短路，我们的方法将返回<em>null</em>作为响应。</p>
+<p>我们随后将添加一个<em>Thread.sleep(5000)</em>以跨越我们设置的睡眠窗口的限制。这将导致<em>Hystrix</em>关闭环路，后续请求将成功流过。</p>
+<h2 id="6-结论"><a href="#6-结论" class="headerlink" title="6 结论"></a>6 结论</h2><p>总之，Hystrix旨在：</p>
+<ol>
+<li>提供对通常通过网络访问的服务的故障和延迟的保护和控制</li>
+<li>停止因某些服务中断而导致的故障级联</li>
+<li>快速失败并迅速恢复</li>
+<li>尽可能优雅地降级</li>
+<li>对故障进行实时监控和指挥中心警报</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-wepay.jpg" alt="Ivan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-alipay.jpg" alt="Ivan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Hystrix/" rel="tag"># Hystrix</a>
+          
+            <a href="/tags/高可用/" rel="tag"># 高可用</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/23/gu-ren-dui-nian-ling-de-cheng-hu/" rel="next" title="古人对年龄的称呼">
+                <i class="fa fa-chevron-left"></i> 古人对年龄的称呼
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/26/spring-data-redis/" rel="prev" title="Spring Data Redis">
+                Spring Data Redis <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/348097?s=460&v=4" alt="Ivan">
+            
+              <p class="site-author-name" itemprop="name">Ivan</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">104</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">99</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/huangfengjing" title="GitHub &rarr; https://github.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:huangfengjing@gmail.com" title="E-Mail &rarr; mailto:huangfengjing@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/huangfengjing" title="Weibo &rarr; https://weibo.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://plus.google.com/huangfengjing" title="Google &rarr; https://plus.google.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/huangfengjing" title="Twitter &rarr; https://twitter.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.facebook.com/huangfengjing" title="FB Page &rarr; https://www.facebook.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-facebook"></i>FB Page</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-概述"><span class="nav-text">1. 概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-简单的例子"><span class="nav-text">2. 简单的例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Maven设置"><span class="nav-text">3. Maven设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-设置远程服务"><span class="nav-text">4. 设置远程服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-使用远程服务和防御性编程"><span class="nav-text">5. 使用远程服务和防御性编程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-具有超时的防御性编程"><span class="nav-text">5.1 具有超时的防御性编程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-有限线程池的防御性编程"><span class="nav-text">**5.2 有限线程池的防御性编程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-3-短路断路器模式的防御性编程"><span class="nav-text">5.3 短路断路器模式的防御性编程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-结论"><span class="nav-text">6 结论</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ivan</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'sPghJWhcIktqFoKTHCULrW4R-gzGzoHsz',
+    appKey: 'BlHUFUqfO9HAKGSBaWWNuTUi',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

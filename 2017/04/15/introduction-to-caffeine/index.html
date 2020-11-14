@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css">
+
+<link href="https://fonts.cat.net/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1 IntroductionIn this article, we’re going to take a look at Caffeine — a high-performance caching library for Java. One fundamental difference between a cache and a Map is that a cache evicts stored">
+<meta name="keywords" content="缓存,Caffine">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Introduction to Caffeine">
+<meta property="og:url" content="http://doboot.github.io/2017/04/15/introduction-to-caffeine/index.html">
+<meta property="og:site_name" content="Ivan&#39;s Blog">
+<meta property="og:description" content="1 IntroductionIn this article, we’re going to take a look at Caffeine — a high-performance caching library for Java. One fundamental difference between a cache and a Map is that a cache evicts stored">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-14T06:10:20.919Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Introduction to Caffeine">
+<meta name="twitter:description" content="1 IntroductionIn this article, we’re going to take a look at Caffeine — a high-performance caching library for Java. One fundamental difference between a cache and a Map is that a cache evicts stored">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Ivan's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://doboot.github.io/2017/04/15/introduction-to-caffeine/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Introduction to Caffeine | Ivan's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ivan's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">虽日暮途远，仍梦想诗和远方</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://doboot.github.io/2017/04/15/introduction-to-caffeine/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ivan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/348097?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ivan's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Introduction to Caffeine
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-04-15 11:32:00" itemprop="dateCreated datePublished" datetime="2017-04-15T11:32:00+08:00">2017-04-15</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-14 14:10:20" itemprop="dateModified" datetime="2020-11-14T14:10:20+08:00">2020-11-14</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2017/04/15/introduction-to-caffeine/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2017/04/15/introduction-to-caffeine/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">10k</span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-Introduction"><a href="#1-Introduction" class="headerlink" title="1 Introduction"></a>1 Introduction</h3><p>In this article, we’re going to take a look at <a href="https://github.com/ben-manes/caffeine" target="_blank" rel="noopener">Caffeine</a> — a <strong>high-performance caching library for Java</strong>.</p>
+<p>One fundamental difference between a cache and a <em>Map</em> is that a cache evicts stored items.</p>
+<p>An <strong>eviction policy decides which objects should be deleted</strong> at any given time. This policy <strong>directly affects the cache’s hit rate</strong> — a crucial characteristic of caching libraries.</p>
+<p>Caffeine uses the <em>Window TinyLfu</em> eviction policy, which provides a <strong>near-optimal hit rate</strong>.</p>
+<a id="more"></a>
+<h3 id="2-Dependency"><a href="#2-Dependency" class="headerlink" title="2 Dependency"></a>2 Dependency</h3><p>We need to add the <em>caffeine</em> dependency to our <em>pom.xml</em>:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.ben-manes.caffeine<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>caffeine<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.5.5<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>You can find the latest version of <em>caffeine</em> <a href="https://search.maven.org/classic/#search%7Cgav%7C1%7Cg%3A%22com.github.ben-manes.caffeine%22%20AND%20a%3A%22caffeine%22" target="_blank" rel="noopener">on Maven Central</a>.</p>
+<h3 id="3-Populating-Cache"><a href="#3-Populating-Cache" class="headerlink" title="3 Populating Cache"></a>3 Populating Cache</h3><p>Let’s focus on Caffeine’s <strong>three strategies for cache population</strong>: manual, synchronous loading, and asynchronous loading.</p>
+<p>First, let’s write a class for the types of values that we’ll store in our cache:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DataObject</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> String data;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> objectCounter = <span class="number">0</span>;</span><br><span class="line">    <span class="comment">// standard constructors/getters</span></span><br><span class="line">     </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> DataObject <span class="title">get</span><span class="params">(String data)</span> </span>&#123;</span><br><span class="line">        objectCounter++;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> DataObject(data);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3-1-Manual-Populating"><a href="#3-1-Manual-Populating" class="headerlink" title="3.1 Manual Populating"></a>3.1 Manual Populating</h4><p>In this strategy, we manually put values into the cache and retrieve them later.</p>
+<p>Let’s initialize our cache:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Cache&lt;String, DataObject&gt; cache = Caffeine.newBuilder()</span><br><span class="line">  .expireAfterWrite(<span class="number">1</span>, TimeUnit.MINUTES)</span><br><span class="line">  .maximumSize(<span class="number">100</span>)</span><br><span class="line">  .build();</span><br></pre></td></tr></table></figure>
+<p>Now, <strong>we can get some value from the cache using the getIfPresent method</strong>. This method will return <em>null</em> if the value is not present in the cache:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">String key = <span class="string">"A"</span>;</span><br><span class="line">DataObject dataObject = cache.getIfPresent(key);</span><br><span class="line"> </span><br><span class="line">assertNull(dataObject);</span><br></pre></td></tr></table></figure>
+<p>We can <strong>populate the cache</strong> manually using the <em>put</em> method:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cache.put(key, dataObject);</span><br><span class="line">dataObject = cache.getIfPresent(key);</span><br><span class="line"> </span><br><span class="line">assertNotNull(dataObject);</span><br></pre></td></tr></table></figure>
+<p><strong>We can also get the value using the get method</strong>, which takes a <em>Function</em> along with a key as an argument. This function will be used for providing the fallback value if the key is not present in the cache, which would be inserted in the cache after computation:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dataObject = cache</span><br><span class="line">  .get(key, k -&gt; DataObject.get(<span class="string">"Data for A"</span>));</span><br><span class="line"> </span><br><span class="line">assertNotNull(dataObject);</span><br><span class="line">assertEquals(<span class="string">"Data for A"</span>, dataObject.getData());</span><br></pre></td></tr></table></figure>
+<p>The <em>get</em> method performs the computation atomically. This means that the computation will be made only once — even if several threads ask for the value simultaneously. That’s why <strong>using get is preferable to getIfPresent</strong>.</p>
+<p>Sometimes we need to <strong>invalidate some cached values</strong> manually:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cache.invalidate(key);</span><br><span class="line">dataObject = cache.getIfPresent(key);</span><br><span class="line"> </span><br><span class="line">assertNull(dataObject);</span><br></pre></td></tr></table></figure>
+<h4 id="3-2-Synchronous-Loading"><a href="#3-2-Synchronous-Loading" class="headerlink" title="3.2 Synchronous Loading"></a>3.2 Synchronous Loading</h4><p>This method of loading the cache takes a <em>Function,</em> which is used for initializing values, similar to the <em>get</em> method of the manual strategy. Let’s see how we can use that.</p>
+<p>First of all, we need to initialize our cache:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">LoadingCache&lt;String, DataObject&gt; cache = Caffeine.newBuilder()</span><br><span class="line">  .maximumSize(<span class="number">100</span>)</span><br><span class="line">  .expireAfterWrite(<span class="number">1</span>, TimeUnit.MINUTES)</span><br><span class="line">  .build(k -&gt; DataObject.get(<span class="string">"Data for "</span> + k));</span><br></pre></td></tr></table></figure>
+<p>Now we can retrieve the values using the <em>get</em> method:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">DataObject dataObject = cache.get(key);</span><br><span class="line"> </span><br><span class="line">assertNotNull(dataObject);</span><br><span class="line">assertEquals(<span class="string">"Data for "</span> + key, dataObject.getData());</span><br></pre></td></tr></table></figure>
+<p>We can also get a set of values using the <em>getAll</em> method:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, DataObject&gt; dataObjectMap </span><br><span class="line">  = cache.getAll(Arrays.asList(<span class="string">"A"</span>, <span class="string">"B"</span>, <span class="string">"C"</span>));</span><br><span class="line"> </span><br><span class="line">assertEquals(<span class="number">3</span>, dataObjectMap.size());</span><br></pre></td></tr></table></figure>
+<p>Values are retrieved from the underlying back-end initialization <em>Function</em> that was passed to the <em>build</em> method. <strong>This makes it possible to use the cache as the main facade for accessing values.</strong></p>
+<h4 id="3-3-Asynchronous-Loading"><a href="#3-3-Asynchronous-Loading" class="headerlink" title="3.3 Asynchronous Loading"></a>3.3 Asynchronous Loading</h4><p>This strategy <strong>works the same as the previous but performs operations asynchronously and returns a CompletableFuture</strong> holding the actual value:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">AsyncLoadingCache&lt;String, DataObject&gt; cache = Caffeine.newBuilder()</span><br><span class="line">  .maximumSize(100)</span><br><span class="line">  .expireAfterWrite(1, TimeUnit.MINUTES)</span><br><span class="line">  .buildAsync(k -&gt; DataObject.get(&quot;Data for &quot; + k));</span><br></pre></td></tr></table></figure>
+<p>We can <strong>use the get and getAll methods</strong>, in the same manner, taking into account the fact that they return <em>CompletableFuture</em>:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">String key = <span class="string">"A"</span>;</span><br><span class="line"> </span><br><span class="line">cache.get(key).thenAccept(dataObject -&gt; &#123;</span><br><span class="line">    assertNotNull(dataObject);</span><br><span class="line">    assertEquals(<span class="string">"Data for "</span> + key, dataObject.getData());</span><br><span class="line">&#125;);</span><br><span class="line"> </span><br><span class="line">cache.getAll(Arrays.asList(<span class="string">"A"</span>, <span class="string">"B"</span>, <span class="string">"C"</span>))</span><br><span class="line">  .thenAccept(dataObjectMap -&gt; assertEquals(<span class="number">3</span>, dataObjectMap.size()));</span><br></pre></td></tr></table></figure>
+<p><em>CompletableFuture</em> has a rich and useful API, which you can read more about <a href="https://www.doleje.com/java-completablefuture" target="_blank" rel="noopener">in this article</a>.</p>
+<h3 id="4-Eviction-of-Values"><a href="#4-Eviction-of-Values" class="headerlink" title="4 Eviction of Values"></a>4 Eviction of Values</h3><p>Caffeine has <strong>three strategies for value eviction</strong>: size-based, time-based, and reference-based.</p>
+<h4 id="4-1-Size-Based-Eviction"><a href="#4-1-Size-Based-Eviction" class="headerlink" title="4.1 Size-Based Eviction"></a>4.1 Size-Based Eviction</h4><p>This type of eviction assumes that <strong>eviction occurs when the configured size limit of the cache is exceeded</strong>. There are <strong>two ways of getting the size</strong> — counting objects in the cache, or getting their weights.</p>
+<p>Let’s see how we could <strong>count objects in the cache</strong>. When the cache is initialized, its size is equal to zero:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">LoadingCache&lt;String, DataObject&gt; cache = Caffeine.newBuilder()</span><br><span class="line">  .maximumSize(<span class="number">1</span>)</span><br><span class="line">  .build(k -&gt; DataObject.get(<span class="string">"Data for "</span> + k));</span><br><span class="line"> </span><br><span class="line">assertEquals(<span class="number">0</span>, cache.estimatedSize());</span><br></pre></td></tr></table></figure>
+<p>When we add a value, the size obviously increases:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cache.get(<span class="string">"A"</span>);</span><br><span class="line"> </span><br><span class="line">assertEquals(<span class="number">1</span>, cache.estimatedSize());</span><br></pre></td></tr></table></figure>
+<p>We can add the second value to the cache, which leads to the removal of the first value:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cache.get(<span class="string">"B"</span>);</span><br><span class="line">cache.cleanUp();</span><br><span class="line"> </span><br><span class="line">assertEquals(<span class="number">1</span>, cache.estimatedSize());</span><br></pre></td></tr></table></figure>
+<p>It is worth mention that we <strong>call the cleanUp method before getting the cache size</strong>. This is because the cache eviction is executed asynchronously, and this method <strong>helps to await the completion of the eviction</strong>.</p>
+<p>We can also <strong>pass a weigher</strong> <strong><em>Function</em></strong> to get the size of the cache:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">LoadingCache&lt;String, DataObject&gt; cache = Caffeine.newBuilder()</span><br><span class="line">  .maximumWeight(<span class="number">10</span>)</span><br><span class="line">  .weigher((k,v) -&gt; <span class="number">5</span>)</span><br><span class="line">  .build(k -&gt; DataObject.get(<span class="string">"Data for "</span> + k));</span><br><span class="line"> </span><br><span class="line">assertEquals(<span class="number">0</span>, cache.estimatedSize());</span><br><span class="line"> </span><br><span class="line">cache.get(<span class="string">"A"</span>);</span><br><span class="line">assertEquals(<span class="number">1</span>, cache.estimatedSize());</span><br><span class="line"> </span><br><span class="line">cache.get(<span class="string">"B"</span>);</span><br><span class="line">assertEquals(<span class="number">2</span>, cache.estimatedSize());</span><br></pre></td></tr></table></figure>
+<p>The values are removed from the cache when the weight is over 10:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cache.get(<span class="string">"C"</span>);</span><br><span class="line">cache.cleanUp();</span><br><span class="line"> </span><br><span class="line">assertEquals(<span class="number">2</span>, cache.estimatedSize());</span><br></pre></td></tr></table></figure>
+<h4 id="4-2-Time-Based-Eviction"><a href="#4-2-Time-Based-Eviction" class="headerlink" title="4.2 Time-Based Eviction"></a>4.2 Time-Based Eviction</h4><p>This eviction strategy is <strong>based on the expiration time of the entry</strong> and has three types:</p>
+<ul>
+<li><strong>Expire after access</strong> — entry is expired after period is passed since the last read or write occurs</li>
+<li><strong>Expire after write</strong> — entry is expired after period is passed since the last write occurs</li>
+<li><strong>Custom policy</strong> — an expiration time is calculated for each entry individually by the <em>Expiry</em> implementation</li>
+</ul>
+<p>Let’s configure the expire-after-access strategy using the <em>expireAfterAccess</em> method:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LoadingCache&lt;String, DataObject&gt; cache = Caffeine.newBuilder()</span><br><span class="line">  .expireAfterAccess(<span class="number">5</span>, TimeUnit.MINUTES)</span><br><span class="line">  .build(k -&gt; DataObject.get(<span class="string">"Data for "</span> + k));</span><br></pre></td></tr></table></figure>
+<p>To configure expire-after-write strategy, we use the <em>expireAfterWrite</em> method:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cache = Caffeine.newBuilder()</span><br><span class="line">  .expireAfterWrite(<span class="number">10</span>, TimeUnit.SECONDS)</span><br><span class="line">  .weakKeys()</span><br><span class="line">  .weakValues()</span><br><span class="line">  .build(k -&gt; DataObject.get(<span class="string">"Data for "</span> + k));</span><br></pre></td></tr></table></figure>
+<p>To initialize a custom policy, we need to implement the <em>Expiry</em> interface:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">cache = Caffeine.newBuilder().expireAfter(<span class="keyword">new</span> Expiry&lt;String, DataObject&gt;() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">expireAfterCreate</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">      String key, DataObject value, <span class="keyword">long</span> currentTime)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.getData().length() * <span class="number">1000</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">expireAfterUpdate</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">      String key, DataObject value, <span class="keyword">long</span> currentTime, <span class="keyword">long</span> currentDuration)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> currentDuration;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">expireAfterRead</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">      String key, DataObject value, <span class="keyword">long</span> currentTime, <span class="keyword">long</span> currentDuration)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> currentDuration;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;).build(k -&gt; DataObject.get(<span class="string">"Data for "</span> + k));</span><br></pre></td></tr></table></figure>
+<h4 id="4-3-Reference-Based-Eviction"><a href="#4-3-Reference-Based-Eviction" class="headerlink" title="4.3 Reference-Based Eviction"></a>4.3 Reference-Based Eviction</h4><p>We can configure our cache to allow <strong>garbage-collection of cache keys and/or values</strong>. To do this, we’d configure usage of the <em>WeakRefence</em> for both keys and values, and we can configure the <em>SoftReference</em> for garbage-collection of values only.</p>
+<p>The <em>WeakRefence</em> usage allows garbage-collection of objects when there are not any strong references to the object. <em>SoftReference</em> allows objects to be garbage-collected based on the global Least-Recently-Used strategy of the JVM. More details about references in Java can be found <a href="https://www.doleje.com/java-weakhashmap" target="_blank" rel="noopener">here</a>.</p>
+<p>We should use <em>Caffeine.weakKeys()</em>, <em>Caffeine.weakValues(),</em> and <em>Caffeine.softValues()</em> to enable each option:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">LoadingCache&lt;String, DataObject&gt; cache = Caffeine.newBuilder()</span><br><span class="line">  .expireAfterWrite(<span class="number">10</span>, TimeUnit.SECONDS)</span><br><span class="line">  .weakKeys()</span><br><span class="line">  .weakValues()</span><br><span class="line">  .build(k -&gt; DataObject.get(<span class="string">"Data for "</span> + k));</span><br><span class="line"> </span><br><span class="line">cache = Caffeine.newBuilder()</span><br><span class="line">  .expireAfterWrite(<span class="number">10</span>, TimeUnit.SECONDS)</span><br><span class="line">  .softValues()</span><br><span class="line">  .build(k -&gt; DataObject.get(<span class="string">"Data for "</span> + k));</span><br></pre></td></tr></table></figure>
+<h3 id="5-Refreshing"><a href="#5-Refreshing" class="headerlink" title="5 Refreshing"></a>5 Refreshing</h3><p>It’s possible to configure the cache to refresh entries after a defined period automatically. Let’s see how to do this using the <em>refreshAfterWrite</em> method:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Caffeine.newBuilder()</span><br><span class="line">  .refreshAfterWrite(<span class="number">1</span>, TimeUnit.MINUTES)</span><br><span class="line">  .build(k -&gt; DataObject.get(<span class="string">"Data for "</span> + k));</span><br></pre></td></tr></table></figure>
+<p>Here we should understand a <strong>difference between expireAfter and refreshAfter</strong>. When the expired entry is requested, an execution blocks until the new value would have been calculated by the build <em>Function</em>.</p>
+<p>But if the entry is eligible for the refreshing, then the cache would return an old value and <strong>asynchronously reload the value</strong>.</p>
+<h3 id="6-Statistics"><a href="#6-Statistics" class="headerlink" title="6 Statistics"></a>6 Statistics</h3><p>Caffeine has a means of <strong>recording statistics about cache usage</strong>:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">LoadingCache&lt;String, DataObject&gt; cache = Caffeine.newBuilder()</span><br><span class="line">  .maximumSize(<span class="number">100</span>)</span><br><span class="line">  .recordStats()</span><br><span class="line">  .build(k -&gt; DataObject.get(<span class="string">"Data for "</span> + k));</span><br><span class="line">cache.get(<span class="string">"A"</span>);</span><br><span class="line">cache.get(<span class="string">"A"</span>);</span><br><span class="line"> </span><br><span class="line">assertEquals(<span class="number">1</span>, cache.stats().hitCount());</span><br><span class="line">assertEquals(<span class="number">1</span>, cache.stats().missCount());</span><br></pre></td></tr></table></figure>
+<p>We may also pass into <em>recordStats</em> supplier, which creates an implementation of the <em>StatsCounter.</em> This object will be pushed with every statistics-related change.</p>
+<h3 id="7-Conclusion"><a href="#7-Conclusion" class="headerlink" title="7 Conclusion"></a>7 Conclusion</h3><p>In this article, we got acquainted with the Caffeine caching library for Java. We saw how to configure and populate a cache, as well as how to choose an appropriate expiration or refresh policy according to our needs.</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-wepay.jpg" alt="Ivan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-alipay.jpg" alt="Ivan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/缓存/" rel="tag"># 缓存</a>
+          
+            <a href="/tags/Caffine/" rel="tag"># Caffine</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/14/wei-hexo-zeng-jia-liu-cheng-tu-jie-xi-gong-neng/" rel="next" title="为 Hexo 增加流程图解析功能">
+                <i class="fa fa-chevron-left"></i> 为 Hexo 增加流程图解析功能
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/17/mysql-fen-ku-fen-biao-de-yi-xie-ji-qiao/" rel="prev" title="MySQL分库分表的一些技巧">
+                MySQL分库分表的一些技巧 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/348097?s=460&v=4" alt="Ivan">
+            
+              <p class="site-author-name" itemprop="name">Ivan</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">104</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">99</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/huangfengjing" title="GitHub &rarr; https://github.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:huangfengjing@gmail.com" title="E-Mail &rarr; mailto:huangfengjing@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/huangfengjing" title="Weibo &rarr; https://weibo.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://plus.google.com/huangfengjing" title="Google &rarr; https://plus.google.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/huangfengjing" title="Twitter &rarr; https://twitter.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.facebook.com/huangfengjing" title="FB Page &rarr; https://www.facebook.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-facebook"></i>FB Page</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Introduction"><span class="nav-text">1 Introduction</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Dependency"><span class="nav-text">2 Dependency</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Populating-Cache"><span class="nav-text">3 Populating Cache</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-Manual-Populating"><span class="nav-text">3.1 Manual Populating</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-2-Synchronous-Loading"><span class="nav-text">3.2 Synchronous Loading</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-3-Asynchronous-Loading"><span class="nav-text">3.3 Asynchronous Loading</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Eviction-of-Values"><span class="nav-text">4 Eviction of Values</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-Size-Based-Eviction"><span class="nav-text">4.1 Size-Based Eviction</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-Time-Based-Eviction"><span class="nav-text">4.2 Time-Based Eviction</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-Reference-Based-Eviction"><span class="nav-text">4.3 Reference-Based Eviction</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Refreshing"><span class="nav-text">5 Refreshing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Statistics"><span class="nav-text">6 Statistics</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-Conclusion"><span class="nav-text">7 Conclusion</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ivan</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'sPghJWhcIktqFoKTHCULrW4R-gzGzoHsz',
+    appKey: 'BlHUFUqfO9HAKGSBaWWNuTUi',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

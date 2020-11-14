@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css">
+
+<link href="https://fonts.cat.net/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="首先要说明的是 web上用activex是门被抛弃的技术。为什么这么说，主要基于以下几个原因：  功能过于强大，强大到一旦安装，他所具有的权限可以做任何事，极易被人利用做坏事（相信大家都有浏览网页后莫名被安装流氓软件的经历，当然流氓软件利用的方式不止控件一种）； 通过网页下载控件的中间过程受到操作系统、杀毒软件、浏览器等多方面因素限制，这使你的控件产品未必能在所有用户的电脑上正常使用； 最恶心的一">
+<meta name="keywords" content="UED,activeX">
+<meta property="og:type" content="article">
+<meta property="og:title" content="web上用Activex控件开发步骤(MFC)">
+<meta property="og:url" content="http://doboot.github.io/2008/07/16/web-shang-yong-activex-kong-jian-kai-fa-bu-zou-mfc/index.html">
+<meta property="og:site_name" content="Ivan&#39;s Blog">
+<meta property="og:description" content="首先要说明的是 web上用activex是门被抛弃的技术。为什么这么说，主要基于以下几个原因：  功能过于强大，强大到一旦安装，他所具有的权限可以做任何事，极易被人利用做坏事（相信大家都有浏览网页后莫名被安装流氓软件的经历，当然流氓软件利用的方式不止控件一种）； 通过网页下载控件的中间过程受到操作系统、杀毒软件、浏览器等多方面因素限制，这使你的控件产品未必能在所有用户的电脑上正常使用； 最恶心的一">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-11-14T06:10:20.951Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="web上用Activex控件开发步骤(MFC)">
+<meta name="twitter:description" content="首先要说明的是 web上用activex是门被抛弃的技术。为什么这么说，主要基于以下几个原因：  功能过于强大，强大到一旦安装，他所具有的权限可以做任何事，极易被人利用做坏事（相信大家都有浏览网页后莫名被安装流氓软件的经历，当然流氓软件利用的方式不止控件一种）； 通过网页下载控件的中间过程受到操作系统、杀毒软件、浏览器等多方面因素限制，这使你的控件产品未必能在所有用户的电脑上正常使用； 最恶心的一">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Ivan's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://doboot.github.io/2008/07/16/web-shang-yong-activex-kong-jian-kai-fa-bu-zou-mfc/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>web上用Activex控件开发步骤(MFC) | Ivan's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ivan's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">虽日暮途远，仍梦想诗和远方</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://doboot.github.io/2008/07/16/web-shang-yong-activex-kong-jian-kai-fa-bu-zou-mfc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ivan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/348097?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ivan's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">web上用Activex控件开发步骤(MFC)
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2008-07-16 19:29:00" itemprop="dateCreated datePublished" datetime="2008-07-16T19:29:00+08:00">2008-07-16</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-14 14:10:20" itemprop="dateModified" datetime="2020-11-14T14:10:20+08:00">2020-11-14</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2008/07/16/web-shang-yong-activex-kong-jian-kai-fa-bu-zou-mfc/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2008/07/16/web-shang-yong-activex-kong-jian-kai-fa-bu-zou-mfc/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">6.5k</span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>首先要说明的是 web上用activex是门被抛弃的技术。为什么这么说，主要基于以下几个原因：</p>
+<ol>
+<li>功能过于强大，强大到一旦安装，他所具有的权限可以做任何事，极易被人利用做坏事（相信大家都有浏览网页后莫名被安装流氓软件的经历，当然流氓软件利用的方式不止控件一种）；</li>
+<li>通过网页下载控件的中间过程受到操作系统、杀毒软件、浏览器等多方面因素限制，这使你的控件产品未必能在所有用户的电脑上正常使用；</li>
+<li>最恶心的一点，未签名没有正规安全证书的控件，在最新的浏览器上（IE7等）默认安全策略是直接屏蔽掉的，而你如果想要获取这个信任，需要向微软等少数单位申请，花费有多少？据说是每年4千多……</li>
+</ol>
+<p>看了以上如果你还是想要知道步骤，如下：</p>
+<a id="more"></a>
+<h4 id="一、用Vc-6-0新建工程里的向导创建MFC-activeX-controlWizard"><a href="#一、用Vc-6-0新建工程里的向导创建MFC-activeX-controlWizard" class="headerlink" title="一、用Vc++6.0新建工程里的向导创建MFC activeX controlWizard"></a>一、用Vc++6.0新建工程里的向导创建MFC activeX controlWizard</h4><p>细节不说了，根据你控件需要了，略有不同，问题不会太大。</p>
+<h4 id="二、你控件代码的主xx-cpp（非xxCtr-cpp）文件中添加安全接口函数"><a href="#二、你控件代码的主xx-cpp（非xxCtr-cpp）文件中添加安全接口函数" class="headerlink" title="二、你控件代码的主xx.cpp（非xxCtr.cpp）文件中添加安全接口函数"></a>二、你控件代码的主xx.cpp（非xxCtr.cpp）文件中添加安全接口函数</h4><p>否则每次运行控件时IE都会给出安全提示，很烦！</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"comcat.h"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"Objsafe.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 本控件的CLSID,注册表用</span></span><br><span class="line"><span class="keyword">const</span> GUID CDECL CLSID_SafeItem =&#123; <span class="number">0x7AE7497B</span>, <span class="number">0xCAD8</span>, <span class="number">0x4E66</span>, &#123; <span class="number">0xA5</span>,<span class="number">0x8B</span>,<span class="number">0xDD</span>,<span class="number">0xE9</span>,<span class="number">0xBC</span>,<span class="number">0xAF</span>,<span class="number">0x6B</span>,<span class="number">0x61</span> &#125; &#125;;</span><br><span class="line"><span class="comment">// 版本控制</span></span><br><span class="line"><span class="keyword">const</span> WORD _wVerMajor = <span class="number">1</span>;</span><br><span class="line"><span class="comment">// 次版本号</span></span><br><span class="line"><span class="keyword">const</span> WORD _wVerMinor = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/////////////////////////////////////////////////////////////////////</span></span><br><span class="line"><span class="comment">// CICCardApp::InitInstance - DLL initialization</span></span><br><span class="line"></span><br><span class="line"><span class="function">BOOL <span class="title">CICCardApp::InitInstance</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	BOOL bInit = COleControlModule::InitInstance();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (bInit)</span><br><span class="line">	&#123;</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> bInit;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//////////////////////////////////////////////////////////////////////</span></span><br><span class="line"><span class="comment">// CICCardApp::ExitInstance - DLL termination</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">CICCardApp::ExitInstance</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> COleControlModule::ExitInstance();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//////////////////////////////////////////////////////////////////////</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建组件种类</span></span><br><span class="line"><span class="function">HRESULT <span class="title">CreateComponentCategory</span><span class="params">(CATID catid, WCHAR* catDescription)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	ICatRegister* pcr = <span class="literal">NULL</span> ;</span><br><span class="line">	HRESULT hr = S_OK ;</span><br><span class="line"></span><br><span class="line">	hr = CoCreateInstance(CLSID_StdComponentCategoriesMgr,</span><br><span class="line">	<span class="literal">NULL</span>, CLSCTX_INPROC_SERVER, IID_ICatRegister, (<span class="keyword">void</span>**)&amp;pcr);</span><br><span class="line">	<span class="keyword">if</span> (FAILED(hr))</span><br><span class="line">	<span class="keyword">return</span> hr;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Make sure the HKCR\Component Categories\&#123;..catid...&#125;</span></span><br><span class="line">	<span class="comment">// key is registered.</span></span><br><span class="line">	CATEGORYINFO catinfo;</span><br><span class="line">	catinfo.catid = catid;</span><br><span class="line">	catinfo.lcid = <span class="number">0x0409</span> ; <span class="comment">// english</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// Make sure the provided description is not too long.</span></span><br><span class="line">	<span class="comment">// Only copy the first 127 characters if it is.</span></span><br><span class="line">	<span class="keyword">int</span> len = wcslen(catDescription);</span><br><span class="line">	<span class="keyword">if</span> (len&gt;<span class="number">127</span>)</span><br><span class="line">	len = <span class="number">127</span>;</span><br><span class="line">	wcsncpy(catinfo.szDescription, catDescription, len);</span><br><span class="line">	<span class="comment">// Make sure the description is null terminated.</span></span><br><span class="line">	catinfo.szDescription[len] = <span class="string">'\0'</span>;</span><br><span class="line"></span><br><span class="line">	hr = pcr-&gt;RegisterCategories(<span class="number">1</span>, &amp;catinfo);</span><br><span class="line">	pcr-&gt;Release();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> hr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 注册组件种类</span></span><br><span class="line"><span class="function">HRESULT <span class="title">RegisterCLSIDInCategory</span><span class="params">(REFCLSID clsid, CATID catid)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="comment">// Register your component categories information.</span></span><br><span class="line">	ICatRegister* pcr = <span class="literal">NULL</span> ;</span><br><span class="line">	HRESULT hr = S_OK ;</span><br><span class="line">	hr = CoCreateInstance(CLSID_StdComponentCategoriesMgr,</span><br><span class="line">	<span class="literal">NULL</span>, CLSCTX_INPROC_SERVER, IID_ICatRegister, (<span class="keyword">void</span>**)&amp;pcr);</span><br><span class="line">	<span class="keyword">if</span> (SUCCEEDED(hr))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// Register this category as being "implemented" by the class.</span></span><br><span class="line">		CATID rgcatid[<span class="number">1</span>] ;</span><br><span class="line">		rgcatid[<span class="number">0</span>] = catid;</span><br><span class="line">		hr = pcr-&gt;RegisterClassImplCategories(clsid, <span class="number">1</span>, rgcatid);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (pcr != <span class="literal">NULL</span>)</span><br><span class="line">		pcr-&gt;Release();</span><br><span class="line">	<span class="keyword">return</span> hr;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 卸载组件种类</span></span><br><span class="line"><span class="function">HRESULT <span class="title">UnRegisterCLSIDInCategory</span><span class="params">(REFCLSID clsid, CATID catid)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	ICatRegister* pcr = <span class="literal">NULL</span> ;</span><br><span class="line">	HRESULT hr = S_OK ;</span><br><span class="line"></span><br><span class="line">	hr = CoCreateInstance(CLSID_StdComponentCategoriesMgr,</span><br><span class="line">	<span class="literal">NULL</span>, CLSCTX_INPROC_SERVER, IID_ICatRegister, (<span class="keyword">void</span>**)&amp;pcr);</span><br><span class="line">	<span class="keyword">if</span> (SUCCEEDED(hr))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="comment">// Unregister this category as being "implemented" by the class.</span></span><br><span class="line">		CATID rgcatid[<span class="number">1</span>] ;</span><br><span class="line">		rgcatid[<span class="number">0</span>] = catid;</span><br><span class="line">		hr = pcr-&gt;UnRegisterClassImplCategories(clsid, <span class="number">1</span>, rgcatid);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (pcr != <span class="literal">NULL</span>)</span><br><span class="line">	pcr-&gt;Release();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> hr;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// DllRegisterServer - Adds entries to the system registry</span></span><br><span class="line"><span class="function">STDAPI <span class="title">DllRegisterServer</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	HRESULT hr;</span><br><span class="line"></span><br><span class="line">	AFX_MANAGE_STATE(_afxModuleAddrThis);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!AfxOleRegisterTypeLib(AfxGetInstanceHandle(), _tlid))</span><br><span class="line">		<span class="keyword">return</span> ResultFromScode(SELFREG_E_TYPELIB);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!COleObjectFactoryEx::UpdateRegistryAll(TRUE))</span><br><span class="line">		<span class="keyword">return</span> ResultFromScode(SELFREG_E_CLASS);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 标记控件初始化安全.</span></span><br><span class="line">	<span class="comment">// 创建初始化安全组件种类</span></span><br><span class="line">	hr = CreateComponentCategory(CATID_SafeForInitializing,</span><br><span class="line">	<span class="string">L"Controls safely initializable from persistent data!"</span>);</span><br><span class="line">	<span class="keyword">if</span> (FAILED(hr))</span><br><span class="line">		<span class="keyword">return</span> hr;</span><br><span class="line">	<span class="comment">// 注册初始化安全</span></span><br><span class="line">	hr = RegisterCLSIDInCategory(CLSID_SafeItem, CATID_SafeForInitializing);</span><br><span class="line">	<span class="keyword">if</span> (FAILED(hr))</span><br><span class="line">		<span class="keyword">return</span> hr;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 标记控件脚本安全</span></span><br><span class="line">	<span class="comment">// 创建脚本安全组件种类</span></span><br><span class="line">	hr = CreateComponentCategory(CATID_SafeForScripting, <span class="string">L"Controls safely scriptable!"</span>);</span><br><span class="line">	<span class="keyword">if</span> (FAILED(hr))</span><br><span class="line">		<span class="keyword">return</span> hr;</span><br><span class="line">	<span class="comment">// 注册脚本安全组件种类</span></span><br><span class="line">	hr = RegisterCLSIDInCategory(CLSID_SafeItem, CATID_SafeForScripting);</span><br><span class="line">	<span class="keyword">if</span> (FAILED(hr))</span><br><span class="line">		<span class="keyword">return</span> hr;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> NOERROR;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//////////////////////////////////////////////////////////////////</span></span><br><span class="line"><span class="comment">// DllUnregisterServer - Removes entries from the system registry</span></span><br><span class="line"></span><br><span class="line"><span class="function">STDAPI <span class="title">DllUnregisterServer</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	HRESULT hr;</span><br><span class="line"></span><br><span class="line">	AFX_MANAGE_STATE(_afxModuleAddrThis);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!AfxOleUnregisterTypeLib(_tlid, _wVerMajor, _wVerMinor))</span><br><span class="line">		<span class="keyword">return</span> ResultFromScode(SELFREG_E_TYPELIB);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!COleObjectFactoryEx::UpdateRegistryAll(FALSE))</span><br><span class="line">		<span class="keyword">return</span> ResultFromScode(SELFREG_E_CLASS);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 删除控件初始化安全入口.</span></span><br><span class="line">	hr=UnRegisterCLSIDInCategory(CLSID_SafeItem, CATID_SafeForInitializing);</span><br><span class="line">	<span class="keyword">if</span> (FAILED(hr))</span><br><span class="line">		<span class="keyword">return</span> hr;</span><br><span class="line">	<span class="comment">// 删除控件脚本安全入口</span></span><br><span class="line">	hr=UnRegisterCLSIDInCategory(CLSID_SafeItem, CATID_SafeForScripting);</span><br><span class="line">	<span class="keyword">if</span> (FAILED(hr))</span><br><span class="line">	<span class="keyword">return</span> hr;</span><br><span class="line"></span><br><span class="line">	<span class="comment">//////////////////////////</span></span><br><span class="line">	<span class="keyword">return</span> NOERROR;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="三、添加自己的代码到控件文件xxCtr-cpp中"><a href="#三、添加自己的代码到控件文件xxCtr-cpp中" class="headerlink" title="三、添加自己的代码到控件文件xxCtr.cpp中"></a>三、添加自己的代码到控件文件xxCtr.cpp中</h4><p>这里最好通过向导添加 <strong>View-&gt;ClassWard-&gt;automation</strong>。</p>
+<h4 id="四、编译生成你的xx-ocx控件文件"><a href="#四、编译生成你的xx-ocx控件文件" class="headerlink" title="四、编译生成你的xx.ocx控件文件"></a>四、编译生成你的xx.ocx控件文件</h4><p>这个文件其实就是个DLL函数库，只是后缀不同而已。</p>
+<h4 id="五、制作xx-inf文件用于之后的空间打包压缩"><a href="#五、制作xx-inf文件用于之后的空间打包压缩" class="headerlink" title="五、制作xx.inf文件用于之后的空间打包压缩"></a>五、制作xx.inf文件用于之后的空间打包压缩</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[version]   signature="$CHICAGO$"   AdvancedINF=1.0   [Add.Code]   xx.ocx=xx.ocx   [xx.ocx]   file-win32-x86=thiscab   clsid=&#123;351FC603-D784-4B8D-BA2C-33C212EC5BAA&#125;   FileVersion=1,0,0,1   RegisterServer=yes</span><br></pre></td></tr></table></figure>
+<h4 id="六、打包压缩成xx-cab文件"><a href="#六、打包压缩成xx-cab文件" class="headerlink" title="六、打包压缩成xx.cab文件"></a>六、打包压缩成xx.cab文件</h4><p>你需要用到给控件签名的一些工具：cabarc.exe、signcode.exe,另外你可能需要用于制作自己试验证书的工具：makecert.exe、cert2spc.exe。<br>制作根证书MyCert.cer和私钥myKey.PVK：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">makecert -r  -sv "myKey.PVK"  -n CN="xx Electric Industry Co. Ltd."   MyCert.cer</span><br><span class="line">CERT2SPC MyOKIcert.cer MyOKIcert.spc打包压缩空间为xx.cab：</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cabarc -s 6144 n xx.cab xx.ocx xx.inf</span><br></pre></td></tr></table></figure>
+<p>数字签名cab文件<br>双击signocode.exe文件，图形化签名，注意要通过自定义选择自己的证书和私钥而不是选择系统已有的。</p>
+<h4 id="七、在你要用空间的Web上添加代码："><a href="#七、在你要用空间的Web上添加代码：" class="headerlink" title="七、在你要用空间的Web上添加代码："></a>七、在你要用空间的Web上添加代码：</h4><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">td</span> <span class="attr">colspan</span>=<span class="string">"2"</span>&gt;</span><span class="tag">&lt;<span class="name">object</span> <span class="attr">id</span>=<span class="string">'t1'</span> <span class="attr">codeBase</span>=<span class="string">/UserMode/xx.cab#version</span>=<span class="string">1,0,0,1</span> <span class="attr">classid</span>=<span class="string">'clsid:F3530445-A287-4A0B-AC3E-C4AF2B63EBA7'</span> <span class="attr">height</span>=<span class="string">0</span> <span class="attr">width</span>=<span class="string">0</span> &gt;</span><span class="tag">&lt;/<span class="name">object</span>&gt;</span><span class="tag">&lt;/<span class="name">td</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h4 id="八、调用控件内方法。"><a href="#八、调用控件内方法。" class="headerlink" title="八、调用控件内方法。"></a>八、调用控件内方法。</h4><p>通过javascript直接调用控件对象的方法就行了，比如调用空间中存在的一个download()方法： <em>document.getElementByID(“t1”).download();</em>八。客户端使用，其他人从网上下载到你的控件后，如果是Window XP系统的话，需要先导入证书为可信任（详细到Google上搜索导入证书，很容易），再安装控件，之后才能用；而如果是Window2000用户则只要安装控件就可以使用了。</p>
+<h4 id="九、控件的删除"><a href="#九、控件的删除" class="headerlink" title="九、控件的删除"></a>九、控件的删除</h4><p>Internet选项-〉设定-〉显示对象，直接看到你的xx.cab文件，Del掉就行了，注册表中信息会自动消除掉，当然你也可以直接到注册表中删除对应xx.inf中列出的键值的项。</p>
+<h4 id="十、升级"><a href="#十、升级" class="headerlink" title="十、升级"></a>十、升级</h4><p>只要在源代码中更改xx.rc文件中对应的那些1.0.0.1为你的新版本号，并同时更改你调用控件的web上的版本号就可以了，下一次客户访问这个页面时会自动提示安装新控件，新控件会覆盖就版本的控件。</p>
+<p>以上仅供参考，本人也是新手，最近工作需要用控件才能完成一些功能，以上包含了我开发过程中碰到的诸多问题，希望对所有人能有所帮助</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-wepay.jpg" alt="Ivan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-alipay.jpg" alt="Ivan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/UED/" rel="tag"># UED</a>
+          
+            <a href="/tags/activeX/" rel="tag"># activeX</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2008/07/10/ubuntu-zhong-java-huan-jing-pei-zhi-ji-xiang-guan/" rel="next" title="Ubuntu中JAVA 环境配置及相关">
+                <i class="fa fa-chevron-left"></i> Ubuntu中JAVA 环境配置及相关
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2008/08/20/ubuntu8-04-zi-dong-gua-zai-ying-pan-fen-qu/" rel="prev" title="Ubuntu8.04自动挂载硬盘分区">
+                Ubuntu8.04自动挂载硬盘分区 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/348097?s=460&v=4" alt="Ivan">
+            
+              <p class="site-author-name" itemprop="name">Ivan</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">104</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">99</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/huangfengjing" title="GitHub &rarr; https://github.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:huangfengjing@gmail.com" title="E-Mail &rarr; mailto:huangfengjing@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/huangfengjing" title="Weibo &rarr; https://weibo.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://plus.google.com/huangfengjing" title="Google &rarr; https://plus.google.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/huangfengjing" title="Twitter &rarr; https://twitter.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.facebook.com/huangfengjing" title="FB Page &rarr; https://www.facebook.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-facebook"></i>FB Page</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#一、用Vc-6-0新建工程里的向导创建MFC-activeX-controlWizard"><span class="nav-text">一、用Vc++6.0新建工程里的向导创建MFC activeX controlWizard</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二、你控件代码的主xx-cpp（非xxCtr-cpp）文件中添加安全接口函数"><span class="nav-text">二、你控件代码的主xx.cpp（非xxCtr.cpp）文件中添加安全接口函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三、添加自己的代码到控件文件xxCtr-cpp中"><span class="nav-text">三、添加自己的代码到控件文件xxCtr.cpp中</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四、编译生成你的xx-ocx控件文件"><span class="nav-text">四、编译生成你的xx.ocx控件文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#五、制作xx-inf文件用于之后的空间打包压缩"><span class="nav-text">五、制作xx.inf文件用于之后的空间打包压缩</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#六、打包压缩成xx-cab文件"><span class="nav-text">六、打包压缩成xx.cab文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#七、在你要用空间的Web上添加代码："><span class="nav-text">七、在你要用空间的Web上添加代码：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#八、调用控件内方法。"><span class="nav-text">八、调用控件内方法。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#九、控件的删除"><span class="nav-text">九、控件的删除</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#十、升级"><span class="nav-text">十、升级</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ivan</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'sPghJWhcIktqFoKTHCULrW4R-gzGzoHsz',
+    appKey: 'BlHUFUqfO9HAKGSBaWWNuTUi',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

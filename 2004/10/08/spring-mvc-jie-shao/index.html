@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.2/css/font-awesome.min.css">
+
+<link href="https://fonts.cat.net/css?family=Lato:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|Lobster Two:300,300italic,400,400italic,700,700italic|Roboto Mono:300,300italic,400,400italic,700,700italic&amp;subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1. 介绍最近很多同学也开始使用Spring框架（http://springframework.org）做一些网站了，之前给大家推荐的时候好像都还不感冒，甚至都不知道是什么框架，仍然埋头 Struts 和 Hibernate 的学习。 Spring作为当前J2EE编程实践的替代方案而受到欢迎。实际上，Spring提供了在J2EE之外的很多通用功能，用于促进良好的编程实践，例如设计接口，单元测试和灵">
+<meta name="keywords" content="SpringMVC,Spring">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SPRING MVC 介绍">
+<meta property="og:url" content="http://doboot.github.io/2004/10/08/spring-mvc-jie-shao/index.html">
+<meta property="og:site_name" content="Ivan&#39;s Blog">
+<meta property="og:description" content="1. 介绍最近很多同学也开始使用Spring框架（http://springframework.org）做一些网站了，之前给大家推荐的时候好像都还不感冒，甚至都不知道是什么框架，仍然埋头 Struts 和 Hibernate 的学习。 Spring作为当前J2EE编程实践的替代方案而受到欢迎。实际上，Spring提供了在J2EE之外的很多通用功能，用于促进良好的编程实践，例如设计接口，单元测试和灵">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://doboot.github.io/images/pasted-112.png">
+<meta property="og:updated_time" content="2020-11-14T06:10:20.931Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SPRING MVC 介绍">
+<meta name="twitter:description" content="1. 介绍最近很多同学也开始使用Spring框架（http://springframework.org）做一些网站了，之前给大家推荐的时候好像都还不感冒，甚至都不知道是什么框架，仍然埋头 Struts 和 Hibernate 的学习。 Spring作为当前J2EE编程实践的替代方案而受到欢迎。实际上，Spring提供了在J2EE之外的很多通用功能，用于促进良好的编程实践，例如设计接口，单元测试和灵">
+<meta name="twitter:image" content="http://doboot.github.io/images/pasted-112.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Ivan's Blog" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="http://doboot.github.io/2004/10/08/spring-mvc-jie-shao/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>SPRING MVC 介绍 | Ivan's Blog</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Ivan's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">虽日暮途远，仍梦想诗和远方</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+        </li>
+      
+    </ul>
+  
+
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://doboot.github.io/2004/10/08/spring-mvc-jie-shao/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Ivan">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="https://avatars0.githubusercontent.com/u/348097?s=460&v=4">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Ivan's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">SPRING MVC 介绍
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2004-10-08 10:54:00" itemprop="dateCreated datePublished" datetime="2004-10-08T10:54:00+08:00">2004-10-08</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-11-14 14:10:20" itemprop="dateModified" datetime="2020-11-14T14:10:20+08:00">2020-11-14</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+            
+              
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+            
+                <span class="post-meta-item-text">评论数：</span>
+                <a href="/2004/10/08/spring-mvc-jie-shao/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2004/10/08/spring-mvc-jie-shao/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">10k</span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a>1. 介绍</h2><p>最近很多同学也开始使用<code>Spring</code>框架（<a href="http://springframework.org/" target="_blank" rel="noopener">http://springframework.org</a>）做一些网站了，之前给大家推荐的时候好像都还不感冒，甚至都不知道是什么框架，仍然埋头 <code>Struts</code> 和 <code>Hibernate</code> 的学习。</p>
+<p>Spring作为当前J2EE编程实践的替代方案而受到欢迎。实际上，<code>Spring</code>提供了在J2EE之外的很多通用功能，用于促进良好的编程实践，例如设计接口，单元测试和灵活性（例如，避免依赖性，可配置性）。</p>
+<p><code>Spring</code>的核心是通过配置文件（通常是XML）来组装组件的系统，这个简单的概念被称为控制反转（IoC），好莱坞原则（“不要找我，我会找你”）和依赖注入。</p>
+<p>例如，考虑一下我们的 DAO 对象所需要的<code>Connection</code>对象，通常，DAO 将在 JNDI 或其他服务中查找此资源。它通常是主动的去从某个地方去“拉”取这个依赖的资源，这种方法强制了 DAO 对于某个特定资源的依赖，必须很明确的知道这个资源来自哪里，怎么实例化（如果是单例的，还要考虑怎么从工厂方法中引入），从而限制DAO的重用性，灵活性和可测试性。当然，可以使用诸如JNDI之类的让这个查找过程简单一点，但仍然必须手动的去管理这些资源的依赖。</p>
+<p>那现在，不妨考虑一种场景，如果我们不让 DAO 自己去“拉”这些依赖的资源，反过来，我们通过其它的一些手段将它需要的资源“推”送给它呢，DAO 本身不需要管理这些依赖资源，只需要关注本身的业务逻辑，是不是更通用一些呢。实际上，这个就是<code>Spring</code>提供的核心理念，让这种资源的依赖管理方式反过来，由<code>Spring</code>容器来主动的推送资源到目标中去，而不需要目标自己去管理，又被称为“依赖注入”。</p>
+<p><code>Spring</code>有时被称为轻量级容器，但<code>Spring</code>实际上非常大（大约有1000个类/接口）。轻量级术语更多地指的是它以最少的依赖性集成技术的能力（与需要实现特定接口的许多J2EE解决方案相反）。</p>
+<p>使用依赖注入框架作为基础，<code>Spring</code>增加了对应用程序功能的许多常见方面的支持，包括持久化，事务控制，AOP，错误处理和分布式计算等。今天主要简单的给大家讲解一下 Spring MVC 相关的知识，好让其它感兴趣的同学能更清晰的认知<code>Spring</code>，加入到基于<code>Spring</code>的应用开发过程中来，提高效率。</p>
+<a id="more"></a>
+<h2 id="2-SPRING-MVC"><a href="#2-SPRING-MVC" class="headerlink" title="2. SPRING MVC"></a>2. SPRING MVC</h2><p>和<code>Struts</code>等其它 MVC 框架类似，<code>Spring</code>也采用了熟悉的模型 - 视图 - 控制器架构，如各种基于Web的框架所示， 一个Front <code>Controller</code>Servlet接收系统的所有HTTP请求，并使用定义的映射路由到实际的业务处理程序。这些处理程序通常是<code>Controller</code>接口的实现，但可以是符合框架规范的任何类。在<code>Spring</code>MVC 中，<code>DispatcherServlet</code>作为Front <code>Controller</code>，调用其他<code>Controller</code>s。它在处理请求的过程中执行若干其他任务（所有这些都以高度可配置的方式提供），包括视图映射和专门的异常处理。本文仅简要介绍这些领域，重点介绍<code>Controller</code>s的使用。</p>
+<p>控制器类似于Struts Action。它处理请求并返回一个<code>ModelAndView</code>对象，该对象包含一个表示<code>Model</code>（用于表示的数据，类似 <code>Map</code>，实际上它的底层实现就是<code>Map</code>）和一个表示展现层的<code>View</code>。<code>Model</code>大家都很熟悉，也很好理解，<code>View</code>则是 <code>Spring</code>的一个抽象概念，表示一个视图对象，<code>Controller</code>通常会返回一个<code>String</code>（由可配置解析<code>ViewResolver</code>将 <code>String</code>解析成真正的页面）或者实例<code>View</code>（直接使用）来表示要展示的页面，空返回表示控制器已完成请求的处理，无需额外的<code>View</code>操作。</p>
+<p><code>Spring</code>框架中存在许多控制器，如下图所示：</p>
+<p><img src="/images/pasted-112.png" alt="Spring Framework Diagram"></p>
+<p>其中<code>SimpleFormController</code>是这些<code>Controller</code>类中最常用的。虽然名称翻译过来是<em>简单表单控制器</em><code>，但SimpleFormController</code> 具有非平凡的生命周期和相关功能 - 正如上面显示的深层继承层次结构所暗示的那样。我们将依次讨论其基类来详细说明其功能。</p>
+<p><code>AbstractController</code>在将请求处理委托给派生类的<code>handleRequestInternal()</code>方法之前，提供一些称之为“低级别”的配置和功能。它生成一些诸如控制缓存的头信息<em>cacheSeconds</em>的属性，根据配置拒绝GET或POST请求，并确保在标记为必需时存在会话，还可以在会话上同步请求以防止同一客户端进行多线程访问等。请注意，<code>Spring</code>与<code>Struts</code>类似，绝大部分<code>Controller</code>是单例重复使用的。（或者，<code>ThrowawayController</code>为每个请求实例化控制器实现。）</p>
+<p><code>BaseCommandController</code>将请求参数映射到一个配置好的命令类（类似的<code>Struts</code>的<code>ActionForm</code>，但它是一个非常简单的JavaBean，没有框架的依赖关系）。有时还会注册一个 <em>Validator 验证器</em> 来检查请求内容。注意，该类并未实现 <code>handleRequestInternal()</code>（处理实际的业务逻辑），而是将这部分工作留给它的派生类。它定义了 <code>final bindAndValidate()</code> 来将请求参数绑定到<em>Command Object</em>并验证它的内容。提供了几个钩子来定制这个过程：</p>
+<ul>
+<li><code>initBinder(request, binder)</code>- 可以覆盖以添加<code>PropertyEditors</code>到binder以处理特殊类型</li>
+<li><code>onBind(request, command)</code> - 在绑定后调用，但在验证之前调用。可以重写以执行专门的映射，正确的映射等。</li>
+<li><code>onBindAndValidate(request, command)</code> - 验证后调用。例如，可以覆盖以执行其他验证。</li>
+</ul>
+<p><code>AbstractFormController</code>继承了<code>BaseCommandController</code>并覆盖<code>handleRequestInternal()</code>用于处理GET和POST请求。此类将<em>Command Object</em>（from <code>BaseCommandController</code>）称为表单对象，因此下面将使用此术语。对于POST请求，可以创建表单（命令）对象的默认实例，也可以从会话中检索预先存在的实例（然后删除）。派生<code>AbstractWizardFormController</code>利用会话方法进行多屏输入。会话范围的<em>Command Object</em>也可以用作通过将控制器配置为要求其存在来防止重复表单提交的手段（有关详细信息，请参阅相关的javadocs）。可以通过覆盖<code>formBackingObject()</code>方法来定义初始<em>Command Object</em>。</p>
+<p>接下来，使用请求参数填充表单对象<code>BaseCommandController.bindAndValidate()</code>，<code>AbstractFormController</code>没有定义上面提到的任何相应的抽象方法（<code>initBind</code>等等）。最后，业务逻辑处理被委托给抽象方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ModelAndView <span class="title">processFormSubmission</span><span class="params">(HttpServletRequest request,	</span></span></span><br><span class="line"><span class="function"><span class="params">                  HttpServletResponse response, </span></span></span><br><span class="line"><span class="function"><span class="params">                  Object command, </span></span></span><br><span class="line"><span class="function"><span class="params">                  BindException errors)</span></span></span><br></pre></td></tr></table></figure>
+<p>通过获取<em>Command Object</em>（表单）开始GET请求处理<code>formBackingObject()</code>。这可以被覆盖以提供填充有来自数据库的数据的对象。如果启用，则请求参数然后绑定到<em>Command Object</em>对象，（同样，<code>initBinder()</code>可以专门处理）。最后，处理委托给：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> ModelAndView <span class="title">showForm</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">   	 	    HttpServletRequest request, </span></span></span><br><span class="line"><span class="function"><span class="params">	 	    HttpServletResponse response, </span></span></span><br><span class="line"><span class="function"><span class="params">		    BindException errors)</span> <span class="keyword">throws</span> Exception</span>;</span><br></pre></td></tr></table></figure>
+<p>具体的类<code>SimpleFormController</code>又增强了一些<code>AbstractFormController</code>功能。可以配置表单和成功视图 - 验证失败将用户返回到表单视图，同时成功验证和后续操作将导致成功视图。通常，派生类只需要覆盖几种<code>onSubmit()</code>方法中的一种来处理表单提交（例如保存到数据库）。</p>
+<h2 id="3-MVC-示例"><a href="#3-MVC-示例" class="headerlink" title="3. MVC 示例"></a>3. MVC 示例</h2><p>现在我们来测试验证一下。我们将创建一个简单的表单，用户输入他们的名字并选择他们喜欢的水果。</p>
+<h3 id="3-1-实体对象：Fruit"><a href="#3-1-实体对象：Fruit" class="headerlink" title="3.1 实体对象：Fruit"></a>3.1 实体对象：Fruit</h3><p>Fruit类是一个相当标准的JDK 1.5 Java枚举类型：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Fruit</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">static</span> Map instanceMap = <span class="keyword">new</span> HashMap();</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Fruit APPLE = <span class="keyword">new</span> Fruit(<span class="number">0</span>, <span class="string">"Apple"</span>);</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Fruit ORANGE = <span class="keyword">new</span> Fruit(<span class="number">1</span>, <span class="string">"Orange"</span>);</span><br><span class="line"> </span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">long</span> id;</span><br><span class="line">  <span class="keyword">private</span> String name;</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">private</span> <span class="title">Fruit</span><span class="params">(Long id, String name)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.id = id;</span><br><span class="line">    <span class="keyword">this</span>.name = name;</span><br><span class="line">    instanceMap.put(<span class="keyword">new</span> Long(id), <span class="keyword">this</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  ......</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然，这也可以作为查找表存储在数据库中。由于这些对象对应于HTML <code>&lt;OPTION&gt;</code>标签的字符串值属性，因此主要问题是将下拉列表映射到服务器管理的对象列表。</p>
+<p>要将基于字符串的引用转换为枚举值（反之亦然），我们定义一个专门的<code>java.beans.PropertyEditor</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">FruitSupport</span> <span class="keyword">extends</span> <span class="title">PropertyEditorSupport</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> String <span class="title">getAsText</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    Object value = getValue();</span><br><span class="line">    <span class="keyword">return</span> value == <span class="keyword">null</span> ? <span class="string">""</span> : ((Fruit)value).getId().toString();</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAsText</span><span class="params">(String string)</span></span></span><br><span class="line"><span class="function">      <span class="keyword">throws</span> IllegalArgumentException </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      Long id = Long.valueOf(string);</span><br><span class="line">      Fruit f = Fruit.getById(id);</span><br><span class="line">      <span class="keyword">if</span> (f == <span class="keyword">null</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Invalid id for Fruit: "</span> + string);</span><br><span class="line">      &#125;</span><br><span class="line">      setValue(f);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (NumberFormatException ex) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Invalid id for Fruit: "</span> + string);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-2-Command-Form-类"><a href="#3-2-Command-Form-类" class="headerlink" title="3.2 Command (Form) 类"></a>3.2 Command (Form) 类</h3><p>我们还需要一个JavaBean来表示表单的内容（名称和结果）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FormBean</span> </span>&#123;</span><br><span class="line">  <span class="keyword">private</span> String name;</span><br><span class="line">  <span class="keyword">private</span> Fruit fruit = Fruit.APPLE;</span><br><span class="line"> </span><br><span class="line">  .. getters and setters</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意，这是一个非常非常简单的 JavaBean ，除了属性及 <em>Getter/Setter</em>外没有任何其它的依赖。</p>
+<h3 id="3-3-Spring-配置"><a href="#3-3-Spring-配置" class="headerlink" title="3.3 Spring 配置"></a>3.3 Spring 配置</h3><p>首先我们添加<code>DispatcherServlet</code>到<code>web.xml</code>中，来接管所有的 HTTP 请求（这个就是我们之前提到的 Front Controller Servlet）：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">servlet</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>spring<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">servlet-class</span>&gt;</span></span><br><span class="line">     org.springframework.web.servlet.DispatcherServlet</span><br><span class="line">     <span class="tag">&lt;/<span class="name">servlet-class</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">init-param</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param-name</span>&gt;</span>contextConfigLocation<span class="tag">&lt;/<span class="name">param-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">param-value</span>&gt;</span>/WEB-INF/classes/spring-servlet.xml<span class="tag">&lt;/<span class="name">param-value</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">init-param</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">load-on-startup</span>&gt;</span>1<span class="tag">&lt;/<span class="name">load-on-startup</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">servlet-mapping</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">servlet-name</span>&gt;</span>spring<span class="tag">&lt;/<span class="name">servlet-name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">url-pattern</span>&gt;</span>*.htm<span class="tag">&lt;/<span class="name">url-pattern</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">servlet-mapping</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>请注意，所有<code>.htm</code>URL都将路由到<code>Spring</code>servlet。除了配置MVC架构的其他方面之外，该<code>spring-servlet.xml</code>文件还定义了<code>DispatcherServlet</code>委托给各种处理程序（此处为 <code>Controller</code>）的映射。下面的部分定义了<code>Controller</code>相关的类及其到URL的映射。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"formController"</span> </span></span><br><span class="line"><span class="tag">           <span class="attr">class</span>=<span class="string">"com.ociweb.spring.MyFormController"</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"commandName"</span>&gt;</span><span class="tag">&lt;<span class="name">value</span>&gt;</span>formBeanId<span class="tag">&lt;/<span class="name">value</span>&gt;</span><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"commandClass"</span>&gt;</span></span><br><span class="line">	    <span class="tag">&lt;<span class="name">value</span>&gt;</span>com.ociweb.spring.FormBean<span class="tag">&lt;/<span class="name">value</span>&gt;</span><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">	<span class="comment">&lt;!-- &lt;property name="validator"&gt;&lt;ref local="MyValidator"&gt;&lt;/ref&gt;&lt;/property&gt; --&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"formView"</span>&gt;</span><span class="tag">&lt;<span class="name">value</span>&gt;</span>form<span class="tag">&lt;/<span class="name">value</span>&gt;</span><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"successView"</span>&gt;</span><span class="tag">&lt;<span class="name">value</span>&gt;</span>form<span class="tag">&lt;/<span class="name">value</span>&gt;</span><span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br><span class="line"> </span><br><span class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"urlMapping"</span> </span></span><br><span class="line"><span class="tag">   <span class="attr">class</span>=<span class="string">"org.springframework.web.servlet.handler.SimpleUrlHandlerMapping"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"mappings"</span>&gt;</span></span><br><span class="line">         <span class="tag">&lt;<span class="name">props</span>&gt;</span></span><br><span class="line">             <span class="tag">&lt;<span class="name">prop</span> <span class="attr">key</span>=<span class="string">"/form.htm"</span>&gt;</span>formController<span class="tag">&lt;/<span class="name">prop</span>&gt;</span></span><br><span class="line">         <span class="tag">&lt;/<span class="name">props</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">bean</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>实例<code>MyFormController</code>给出一个id<code>formController</code>，并由<code>urlMapping</code>bean 中的id引用，以将URL映射<code>/form.htm</code>到控制器实例。<code>MyFormControllerr</code>的属性如下：</p>
+<ul>
+<li><code>commandName</code> 定义<em>Command Object</em>的 id</li>
+<li><code>commandClass</code> 将我们的表单bean定义为 <code>FormBean</code>的实例</li>
+<li><code>formView</code> 如果表单提交失败，则定义要调用的视图</li>
+<li><code>successView</code> 如果表单提交成功，则定义要调用的视图</li>
+</ul>
+<p>请注意，这个例子中<code>formViews</code>和<code>uccessView</code>引用了相同的视图，实际的场景中通常不是这样的，这里只是举例演示用法。</p>
+<h3 id="3-4-Controller"><a href="#3-4-Controller" class="headerlink" title="3.4 Controller"></a>3.4 Controller</h3><p>我们演示用的<code>MyFormController</code>比较简单，扩展<code>SimpleFormController</code>并定义了一个默认构造函数来支持<code>Spring</code>实例化。实现<code>initBinder()</code>方法注册<code>PropertyEditor</code>到binder对象以支持我们前面提到的<code>Fruit</code>枚举类型。<code>referenceData()</code>方法获取所有Fruit实例，并将它们放在具有唯一键的映射中，这些内容将在 JSP 页面中使用。</p>
+<p>最后，该<code>onSubmit()</code>方法处理来自表单<em>Command Object</em>的数据。虽然存在许多更简单的<code>onSubmit()</code>方法并且可以被覆盖，但在这种情况下需要完整的参数集（<code>Request</code>，<code>Response</code>等）。复杂性在于返回表单页面，同时保持提供的项目列表<code>referenceData()</code>。在成功提交表单时，不会调用此方法，从而产生一个空列表。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyFormController</span> <span class="keyword">extends</span> <span class="title">SimpleFormController</span> </span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">MyFormController</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initBinder</span><span class="params">(HttpServletRequest request,</span></span></span><br><span class="line"><span class="function"><span class="params">                            ServletRequestDataBinder binder)</span></span></span><br><span class="line"><span class="function">      <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    binder.registerCustomEditor(Fruit<span class="class">.<span class="keyword">class</span>, <span class="title">new</span> <span class="title">FruitSupport</span>())</span>;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">protected</span> Map <span class="title">referenceData</span><span class="params">(HttpServletRequest request)</span></span></span><br><span class="line"><span class="function">      <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    Map retval = <span class="keyword">new</span> HashMap();</span><br><span class="line">    retval.put(<span class="string">"fruits"</span>, Fruit.getAll());</span><br><span class="line">    <span class="keyword">return</span> retval;</span><br><span class="line">  &#125;</span><br><span class="line"> </span><br><span class="line">  <span class="function"><span class="keyword">protected</span> ModelAndView <span class="title">onSubmit</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">                        HttpServletRequest request,</span></span></span><br><span class="line"><span class="function"><span class="params">                        HttpServletResponse response, </span></span></span><br><span class="line"><span class="function"><span class="params">                        Object command,</span></span></span><br><span class="line"><span class="function"><span class="params">                        BindException errors)</span></span></span><br><span class="line"><span class="function">                        <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"> </span><br><span class="line">    FormBean form = (FormBean)command;</span><br><span class="line"> </span><br><span class="line">    <span class="comment">// Act on form submission (e.g. write to database)</span></span><br><span class="line"> </span><br><span class="line">    <span class="comment">// Redirect back to form</span></span><br><span class="line">    <span class="comment">// This will ensure referenceData is set, etc.</span></span><br><span class="line">    <span class="comment">// This is needed when submit action fails despite success of earlier validation.</span></span><br><span class="line"> </span><br><span class="line">    <span class="keyword">return</span> showForm(request, response, errors);    </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="3-5-JSP-页面"><a href="#3-5-JSP-页面" class="headerlink" title="3.5 JSP 页面"></a>3.5 JSP 页面</h3><p>最后，JSP页面用于<code>/form.htm</code>定义<code>View</code>。<code>Spring</code>为许多不同的View选项提供了轻松集成，包括JSP，XSLT，Velocity和FreeMarker。视图可以很容易地与不同的处理程序集成。关于JSP，<code>Spring</code>只支持少量自定义标签，只有一个<code>spring:bind</code>是常用的。我们写的<code>form.jsp</code>页面同时演示了它与JSTL的用法。</p>
+<p>本质上，<code>spring:bind</code>标记创建一个本地上下文，其中  <code>status</code> 变量与HTML标签中引用的变量的绑定相关联。 <code>status</code> 包含上次验证尝试的结果，值绑定和属性的标识符。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">&lt;form method=<span class="string">"post"</span>&gt;</span><br><span class="line">&lt;spring:bind path=<span class="string">"formBeanId.name"</span>&gt;</span><br><span class="line">  &lt;br/&gt;Name   :  &lt;input name=<span class="string">"name"</span> value=<span class="string">"&lt;c:out value="</span>$&#123;status.value&#125;<span class="string">"&gt;&lt;/c:out&gt;"</span>&gt;&lt;br&gt;</span><br><span class="line">  &lt;br/&gt;</span><br><span class="line">&lt;/spring:bind&gt;</span><br><span class="line"> </span><br><span class="line">&lt;spring:bind path=<span class="string">"formBeanId.fruit"</span>&gt;</span><br><span class="line">  Favorite Fruit:   </span><br><span class="line">  &lt;select name=<span class="string">"fruit"</span>&gt;</span><br><span class="line">    &lt;c:forEach <span class="keyword">var</span>=<span class="string">"fruitType"</span> items=<span class="string">"$&#123;fruits&#125;"</span>&gt;</span><br><span class="line">      &lt;option value=<span class="string">"&lt;c:out value="</span>$&#123;fruitType.id&#125;<span class="string">"&gt;&lt;/option&gt;"</span> </span><br><span class="line">        &lt;c:if test="$&#123;fruitType.id == status.value&#125;"&gt; selected="selected"&lt;/c:if&gt; </span><br><span class="line">      &gt;</span><br><span class="line">        &lt;c:out value="$&#123;fruitType.name&#125;"&gt;&lt;/c:out&gt;</span><br><span class="line">      &lt;/option&gt;</span><br><span class="line">    &lt;/c:forEach&gt;</span><br><span class="line">  &lt;/select&gt;</span><br><span class="line">&lt;/spring:bind&gt;</span><br><span class="line">&lt;input type=<span class="string">"submit"</span> name=<span class="string">"Submit"</span> value=<span class="string">"Submit"</span>&gt;</span><br><span class="line">&lt;br/&gt;&lt;br /&gt;</span><br><span class="line">&lt;/form&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="4-摘要"><a href="#4-摘要" class="headerlink" title="4. 摘要"></a>4. 摘要</h2><p>本文仅涉及<code>SpringMVC</code>框架的简单使用方式，并没有涉及 <code>Spring</code>的其它部分，实际上<code>Spring</code>在系统的其他层提供了许多好处，包括与JDO和Hibernate的集成。作为一种通用方法，它促进并简化了测试驱动开发（TDD），它促进了许多有益的设计和开发实践。</p>
+<p><code>Spring</code>正在非常积极的发展和工具整合不断改进。例如，计划的增强功能包括与JSF，JMX和AspectJ的新集成或改进集成。XDoclet支持是可用的，还有一个Eclipse插件。鼓励大家学习研究一个这个<code>Spring</code>框架。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+      <div>
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-wepay.jpg" alt="Ivan 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+      
+      
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/my-alipay.jpg" alt="Ivan 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/SpringMVC/" rel="tag"># SpringMVC</a>
+          
+            <a href="/tags/Spring/" rel="tag"># Spring</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2008/01/17/java-duo-xian-cheng-cheng-xu-she-ji-xiang-xi-jie-xi/" rel="prev" title="Java多线程程序设计详细解析">
+                Java多线程程序设计详细解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="https://avatars0.githubusercontent.com/u/348097?s=460&v=4" alt="Ivan">
+            
+              <p class="site-author-name" itemprop="name">Ivan</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">104</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  
+                    
+                      <a href="/categories/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                      <a href="/tags/">
+                    
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">99</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/huangfengjing" title="GitHub &rarr; https://github.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:huangfengjing@gmail.com" title="E-Mail &rarr; mailto:huangfengjing@gmail.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://weibo.com/huangfengjing" title="Weibo &rarr; https://weibo.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-weibo"></i>Weibo</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://plus.google.com/huangfengjing" title="Google &rarr; https://plus.google.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-google"></i>Google</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://twitter.com/huangfengjing" title="Twitter &rarr; https://twitter.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-twitter"></i>Twitter</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.facebook.com/huangfengjing" title="FB Page &rarr; https://www.facebook.com/huangfengjing" rel="noopener" target="_blank"><i class="fa fa-fw fa-facebook"></i>FB Page</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-介绍"><span class="nav-text">1. 介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-SPRING-MVC"><span class="nav-text">2. SPRING MVC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-MVC-示例"><span class="nav-text">3. MVC 示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-实体对象：Fruit"><span class="nav-text">3.1 实体对象：Fruit</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Command-Form-类"><span class="nav-text">3.2 Command (Form) 类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Spring-配置"><span class="nav-text">3.3 Spring 配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-Controller"><span class="nav-text">3.4 Controller</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-JSP-页面"><span class="nav-text">3.5 JSP 页面</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-摘要"><span class="nav-text">4. 摘要</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Ivan</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+  
+
+<script src="//cdn1.lncld.net/static/js/3.11.1/av-min.js"></script>
+
+
+
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+<script>
+  var GUEST = ['nick', 'mail', 'link'];
+  var guest = 'nick,mail,link';
+  guest = guest.split(',').filter(function(item) {
+    return GUEST.indexOf(item) > -1;
+  });
+  new Valine({
+    el: '#comments',
+    verify: false,
+    notify: false,
+    appId: 'sPghJWhcIktqFoKTHCULrW4R-gzGzoHsz',
+    appKey: 'BlHUFUqfO9HAKGSBaWWNuTUi',
+    placeholder: 'Just go go',
+    avatar: 'mm',
+    meta: guest,
+    pageSize: '10' || 10,
+    visitor: false,
+    lang: '' || 'zh-cn'
+  });
+</script>
+
+
+
+
+  
+
+
+  
+  <script>
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url).replace(/\/{2,}/g, '/');
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x"></i></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x"></i></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
